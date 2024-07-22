@@ -106,7 +106,7 @@ inner_fill_rect_loop:
     bgtz $a2, inner_fill_rect_loop
 
 # outer loop end
-    addi $t2, $t2, 128 # increment the y pointer to the next line(this is the start x position)
+    addi $t2, $t2, 128 # increment the y pointer to the next line (this is the start x position)
     addi $a3, $a3, -1 # decrease height
     move $a2, $t4 # restore the width
     bgtz $a3, outer_fill_rect_loop
