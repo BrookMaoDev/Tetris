@@ -43,12 +43,38 @@
 ##############################################################################
 # Immutable Data
 ##############################################################################
+
 # The address of the bitmap display. Don't forget to connect it!
 ADDR_DSPL:
     .word 0x10008000
+
 # The address of the keyboard. Don't forget to connect it!
 ADDR_KBRD:
     .word 0xffff0000
+
+# The height of a single unit in pixels.
+.eqv UNIT_HEIGHT 4
+
+# The height of the display in unit heights.
+.eqv HEIGHT_IN_UNITS 64
+
+# The width of a single unit in pixels.
+.eqv UNIT_WIDTH 4
+
+# The width of the display in unit widths.
+.eqv WIDTH_IN_UNITS 64
+
+# Constants defining the top-left corner of the playing area.
+.eqv PLAYING_AREA_START_X_IN_UNITS 1
+.eqv PLAYING_AREA_START_Y_IN_UNITS 1
+
+# Constants defining the size of the playing area.
+.eqv PLAYING_AREA_WIDTH_IN_UNITS 63
+.eqv PLAYING_AREA_HEIGHT_IN_UNITS 63
+
+# Colour constants.
+.eqv DARK_GREY 0x7e7e7e
+.eqv LIGHT_GREY 0xbcbcbc
 
 ##############################################################################
 # Mutable Data
@@ -70,6 +96,17 @@ game_loop:
     # 2a. Check for collisions
 	# 2b. Update locations (paddle, ball)
 	# 3. Draw the screen
+
+DRAW_SCREEN:
+    li		$a0, PLAYING_AREA_START_X_IN_UNITS		# $a0 = PLAYING_AREA_START_X_IN_UNITS
+    li		$a1, PLAYING_AREA_START_Y_IN_UNITS		# $a1 = PLAYING_AREA_START_Y_IN_UNITS
+    li		$a2, PLAYING_AREA_WIDTH_IN_UNITS		# $a2 = PLAYING_AREA_WIDTH_IN_UNITS
+    li		$a3, PLAYING_AREA_HEIGHT_IN_UNITS		# $a3 = PLAYING_AREA_HEIGHT_IN_UNITS
+    la		$t0, ADDR_DSPL							# $t0 = ADDR_DSPL
+    lw		$t0, 0($t0)                             # $t0 = *ADDR_DSPL
+    li		$t1, DARK_GREY							# $t1 = DARK_GREY
+    jal		fill_rect								# fill_rect(PLAYING_AREA_START_X_IN_UNITS, PLAYING_AREA_START_Y_IN_UNITS, PLAYING_AREA_WIDTH_IN_UNITS, PLAYING_AREA_HEIGHT_IN_UNITS, ADDR_DSPL, DARK_GREY)
+    
 	# 4. Sleep
 
     #5. Go back to 1
@@ -80,7 +117,7 @@ game_loop:
 # a1 = start y
 # a2 = width
 # a3 = height (modified)
-# v0 = return address (pc)
+# ra = return address (pc)
 # t0 = screen location 
 # t1 = colour
 # uses registers t2, t3, t4
@@ -88,10 +125,10 @@ fill_rect:
     # t2 = pointer of y
     # t2 = 4(start_x + 32 start_y) + display_offset
     # t2 = 4(a0 + 32a1) + t0
-    sll $t2, $a1, 5 # a1 * 32
+    sll $t2, $a1, 6 # a1 * 32
     add $t2, $t2, $a0 # a0 + 32a1
     sll $t2, $t2, 2 # 4(a0 + 32a1)
-    add $t2, $t2, $t0 
+    add $t2, $t2, $t0
 
 outer_fill_rect_loop:
     # t3 = pointer of x
@@ -106,10 +143,10 @@ inner_fill_rect_loop:
     bgtz $a2, inner_fill_rect_loop
 
 # outer loop end
-    addi $t2, $t2, 128 # increment the y pointer to the next line (this is the start x position)
+    addi $t2, $t2, 256 # increment the y pointer to the next line (this is the start x position)
     addi $a3, $a3, -1 # decrease height
     move $a2, $t4 # restore the width
     bgtz $a3, outer_fill_rect_loop
 
     # link back to the program
-    jr $v0
+    jr $ra
