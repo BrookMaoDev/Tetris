@@ -105,17 +105,6 @@ game_loop:
 	# 3. Draw the screen
 
 DRAW_SCREEN:
-    # Draw the playing area background
-    li		$a0, PLAYING_AREA_START_X_IN_UNITS		# $a0 = PLAYING_AREA_START_X_IN_UNITS
-    li		$a1, PLAYING_AREA_START_Y_IN_UNITS		# $a1 = PLAYING_AREA_START_Y_IN_UNITS
-    li		$a2, PLAYING_AREA_WIDTH_IN_UNITS		# $a2 = PLAYING_AREA_WIDTH_IN_UNITS
-    li		$a3, PLAYING_AREA_HEIGHT_IN_UNITS		# $a3 = PLAYING_AREA_HEIGHT_IN_UNITS
-    la		$t0, ADDR_DSPL							# $t0 = ADDR_DSPL
-    lw		$t0, 0($t0)                             # $t0 = *ADDR_DSPL
-    li		$t1, DARK_GREY							# $t1 = DARK_GREY
-    
-    jal		fill_rect								# fill_rect(PLAYING_AREA_START_X_IN_UNITS, PLAYING_AREA_START_Y_IN_UNITS, PLAYING_AREA_WIDTH_IN_UNITS, PLAYING_AREA_HEIGHT_IN_UNITS, ADDR_DSPL, DARK_GREY)
-
     # Draw the checkered pattern
     li		$a0, PLAYING_AREA_START_X_IN_UNITS		# $a0 = PLAYING_AREA_START_X_IN_UNITS
     li		$a1, PLAYING_AREA_START_Y_IN_UNITS		# $a1 = PLAYING_AREA_START_Y_IN_UNITS
@@ -150,8 +139,16 @@ DRAW_ROW_LOOP:
     # Check if x and y are both odd or both even
     andi	$t2, $t2, 1							# $t2 = $a0 & 1
     andi	$t3, $t3, 1							# $t3 = $a1 & 1
-    bne		$t2, $t3, INCREMENT_X				# if $t2 != $t3 then goto INCREMENT_X
+    bne		$t2, $t3, DRAW_DARK_GREY_SQUARE     # if $t2 != $t3 then goto DRAW_DARK_GREY_SQUARE
 
+DRAW_LIGHT_GREY_SQUARE:
+    li		$t1, LIGHT_GREY                     # $t1 = LIGHT_GREY
+    j		DRAW_SQUARE				            # jump to DRAW_SQUARE
+
+DRAW_DARK_GREY_SQUARE:
+    li		$t1, DARK_GREY							# $t1 = DARK_GREY
+
+DRAW_SQUARE:
     jal		fill_rect								# fill_rect(PLAYING_AREA_HEIGHT_IN_UNITS, PLAYING_AREA_START_Y_IN_UNITS, GRID_WIDTH_IN_UNITS, GRID_HEIGHT_IN_UNITS, ADDR_DSPL, LIGHT_GREY)
 
     # Restore modified registers
