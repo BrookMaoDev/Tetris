@@ -7,7 +7,7 @@
 # - Unit width in pixels: 4 (update this as needed) 
 # - Unit height in pixels: 4 (update this as needed)
 # - Display width in pixels: 256 (update this as needed)
-# - Display height in pixels: 256 (update this as needed)
+# - Display height in pixels: 512 (update this as needed)
 # - Base Address for Display: 0x10008000 ($gp)
 #
 # Which milestones have been reached in this submission?
@@ -56,7 +56,7 @@ ADDR_KBRD:
 .eqv UNIT_HEIGHT 4
 
 # The height of the display in unit heights.
-.eqv HEIGHT_IN_UNITS 64
+.eqv HEIGHT_IN_UNITS 128
 
 # The width of a single unit in pixels.
 .eqv UNIT_WIDTH 4
@@ -64,17 +64,24 @@ ADDR_KBRD:
 # The width of the display in unit widths.
 .eqv WIDTH_IN_UNITS 64
 
+# The height of the display in pixels.
+.eqv GRID_HEIGHT_IN_UNITS 4
+.eqv GRID_WIDTH_IN_UNITS 4
+
 # Constants defining the top-left corner of the playing area.
-.eqv PLAYING_AREA_START_X_IN_UNITS 1
-.eqv PLAYING_AREA_START_Y_IN_UNITS 1
+.eqv PLAYING_AREA_START_X_IN_UNITS 4
+.eqv PLAYING_AREA_START_Y_IN_UNITS 4
 
 # Constants defining the size of the playing area.
-.eqv PLAYING_AREA_WIDTH_IN_UNITS 63
-.eqv PLAYING_AREA_HEIGHT_IN_UNITS 63
+.eqv PLAYING_AREA_WIDTH_IN_UNITS 56
+.eqv PLAYING_AREA_HEIGHT_IN_UNITS 120
 
 # Colour constants.
 .eqv DARK_GREY 0x7e7e7e
 .eqv LIGHT_GREY 0xbcbcbc
+
+# The time to sleep between frames in milliseconds.
+.eqv SLEEP_TIME_IN_MS 1000
 
 ##############################################################################
 # Mutable Data
@@ -98,6 +105,7 @@ game_loop:
 	# 3. Draw the screen
 
 DRAW_SCREEN:
+    # Draw the playing area background
     li		$a0, PLAYING_AREA_START_X_IN_UNITS		# $a0 = PLAYING_AREA_START_X_IN_UNITS
     li		$a1, PLAYING_AREA_START_Y_IN_UNITS		# $a1 = PLAYING_AREA_START_Y_IN_UNITS
     li		$a2, PLAYING_AREA_WIDTH_IN_UNITS		# $a2 = PLAYING_AREA_WIDTH_IN_UNITS
@@ -105,9 +113,69 @@ DRAW_SCREEN:
     la		$t0, ADDR_DSPL							# $t0 = ADDR_DSPL
     lw		$t0, 0($t0)                             # $t0 = *ADDR_DSPL
     li		$t1, DARK_GREY							# $t1 = DARK_GREY
-    jal		fill_rect								# fill_rect(PLAYING_AREA_START_X_IN_UNITS, PLAYING_AREA_START_Y_IN_UNITS, PLAYING_AREA_WIDTH_IN_UNITS, PLAYING_AREA_HEIGHT_IN_UNITS, ADDR_DSPL, DARK_GREY)
     
+    jal		fill_rect								# fill_rect(PLAYING_AREA_START_X_IN_UNITS, PLAYING_AREA_START_Y_IN_UNITS, PLAYING_AREA_WIDTH_IN_UNITS, PLAYING_AREA_HEIGHT_IN_UNITS, ADDR_DSPL, DARK_GREY)
+
+    # Draw the checkered pattern
+    li		$a0, PLAYING_AREA_START_X_IN_UNITS		# $a0 = PLAYING_AREA_START_X_IN_UNITS
+    li		$a1, PLAYING_AREA_START_Y_IN_UNITS		# $a1 = PLAYING_AREA_START_Y_IN_UNITS
+    li		$a2, GRID_WIDTH_IN_UNITS                # $a2 = GRID_WIDTH_IN_UNITS
+    li		$a3, GRID_HEIGHT_IN_UNITS               # $a3 = GRID_HEIGHT_IN_UNITS
+    la		$t0, ADDR_DSPL							# $t0 = ADDR_DSPL
+    lw		$t0, 0($t0)                             # $t0 = *ADDR_DSPL
+    li		$t1, LIGHT_GREY							# $t1 = LIGHT_GREY
+
+    # Calculate the rightmost x coordinate of the playing area
+    addi	$s0, $a0, PLAYING_AREA_WIDTH_IN_UNITS			# $s0 = $a0 + PLAYING_AREA_WIDTH_IN_UNITS
+
+    # Calculate the bottommost y coordinate of the playing area
+    addi	$s1, $a1, PLAYING_AREA_HEIGHT_IN_UNITS		    # $s1 = $a1 + PLAYING_AREA_HEIGHT_IN_UNITS
+
+DRAW_ROWS_LOOP:
+    bge		$a1, $s1, END_DRAW_PLAYING_AREA	        # if $a1 >= $s1 then goto END_DRAW_PLAYING_AREA
+
+DRAW_ROW_LOOP:
+    bge		$a0, $s0, END_DRAW_ROW	# if $a0 >= $s0 then goto END_DRAW_ROW
+
+    # Draw a light grey square iff the current x and y coordinates are both odd or both even
+
+    # Divide x by GRID_WIDTH_IN_UNITS
+    div		$a0, $a2			# $a0 / $a2
+    mflo	$t2					# $t2 = floor($a0 / $a2)
+    
+    # Divide y by GRID_HEIGHT_IN_UNITS
+    div		$a1, $a3			# $a1 / $a3
+    mflo	$t3					# $t3 = floor($a1 / $a3)     
+    
+    # Check if x and y are both odd or both even
+    andi	$t2, $t2, 1							# $t2 = $a0 & 1
+    andi	$t3, $t3, 1							# $t3 = $a1 & 1
+    bne		$t2, $t3, INCREMENT_X				# if $t2 != $t3 then goto INCREMENT_X
+
+    jal		fill_rect								# fill_rect(PLAYING_AREA_HEIGHT_IN_UNITS, PLAYING_AREA_START_Y_IN_UNITS, GRID_WIDTH_IN_UNITS, GRID_HEIGHT_IN_UNITS, ADDR_DSPL, LIGHT_GREY)
+
+    # Restore modified registers
+    li		$a3, GRID_HEIGHT_IN_UNITS               # $a3 = GRID_HEIGHT_IN_UNITS
+
+INCREMENT_X:
+    # Shift x to the right by GRID_WIDTH_IN_UNITS
+    addi	$a0, $a0, GRID_WIDTH_IN_UNITS			# $a0 = $a0 + GRID_WIDTH_IN_UNITS
+
+    j		DRAW_ROW_LOOP                           # jump to DRAW_ROW_LOOP
+    
+END_DRAW_ROW:
+    # Move x back to the left and move y down by GRID_HEIGHT_IN_UNITS
+    li		$a0, PLAYING_AREA_START_X_IN_UNITS		# $a0 = PLAYING_AREA_START_X_IN_UNITS
+    addi	$a1, $a1, GRID_HEIGHT_IN_UNITS			# $a1 = $a1 + GRID_HEIGHT_IN_UNITS
+    
+    j		DRAW_ROWS_LOOP                          # jump to DRAW_ROWS_LOOP
+
+END_DRAW_PLAYING_AREA:
+
 	# 4. Sleep
+    li		$v0, 32		# $v0 = 32
+    li		$a0, SLEEP_TIME_IN_MS		# $a0 = SLEEP_TIME_IN_MS
+    syscall		# syscall(32, SLEEP_TIME_IN_MS)
 
     #5. Go back to 1
     b game_loop
