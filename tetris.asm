@@ -90,14 +90,14 @@ ADDR_KBRD:
                 .eqv    TETROMINO_COLOUR, 0x05ffa3
 
     # The time to sleep between frames in milliseconds.
-                .eqv    SLEEP_TIME_IN_MS, 1000
+                .eqv    SLEEP_TIME_IN_MS, 150
 
     ##############################################################################
     # Mutable Data
     ##############################################################################
 
     # Data for the current tetromino(ct) being moved by the player
-ct_x:           .word   0
+ct_x:           .word   6
 ct_y:           .word   0
 ct_colour:      .word   0x05ffa3
     # up to a 4x4 grid. Each block is 1 byte.
@@ -107,6 +107,8 @@ ct_colour:      .word   0x05ffa3
 ct_grid:        .byte   0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0
 ct_auxiliary_grid: .space 16
 ct_grid_size:   .word   3
+# Grid of all tetromino blocks which have been placed.
+tetromino_grid: .space 378
 
     ##############################################################################
     # Code
@@ -232,6 +234,12 @@ INNER_DRAW_CT_LOOP_FINAL:
     jal rotate_ct_cw # rotate the piece clockwise :)
     # Todo: draw the rest of the placed tetrominos.
 
+# Physics
+    # Apply gravity, ct_y ++
+    lw $t7, ct_y
+    addi $t7, $t7, 1
+    sw $t7, ct_y
+
     # 4. Sleep
     li      $v0,            32                                                              # $v0 = 32
     li      $a0,            SLEEP_TIME_IN_MS                                                # $a0 = SLEEP_TIME_IN_MS
@@ -246,8 +254,8 @@ INNER_DRAW_CT_LOOP_FINAL:
 #   Let matrix B be A rotated clockwise by 90 deg.
 #   We can create by by reading every row of A starting from the top,
 #   into every column of B starting from the right.
-#   Ie A = [1, 2: 3, 4], we read the first row into the last column of
-#   B = [x, 1: x, 2] then we read the next row of A into the previous
+#   Ie A = [1, 2; 3, 4], we read the first row into the last column of
+#   B = [x, 1; x, 2] then we read the next row of A into the previous
 #   column of B. So B = [3, 1; 2, 4] This generalizes to n by n matrices.
 #   As the array is stored in a continuous block of memory,
 #   we can just have two pointers for A and B.
