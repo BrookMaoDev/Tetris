@@ -45,89 +45,124 @@
     ##############################################################################
 
     # The address of the bitmap display. Don't forget to connect it!
-ADDR_DSPL:      
-                .word   0x10008000
+ADDR_DSPL:          
+                    .word   0x10008000
 
     # The address of the keyboard. Don't forget to connect it!
-ADDR_KBRD:      
-                .word   0xffff0000
+ADDR_KBRD:          
+                    .word   0xffff0000
 
     # The height of a single unit in pixels.
-                .eqv    UNIT_HEIGHT, 4
+                    .eqv    UNIT_HEIGHT, 4
 
     # The height of the display in unit heights.
-                .eqv    HEIGHT_IN_UNITS, 128
+                    .eqv    HEIGHT_IN_UNITS, 128
 
     # The width of a single unit in pixels.
-                .eqv    UNIT_WIDTH, 4
+                    .eqv    UNIT_WIDTH, 4
 
     # The width of the display in unit widths.
-                .eqv    WIDTH_IN_UNITS, 64
+                    .eqv    WIDTH_IN_UNITS, 64
     # log_2(WIDTH_IN_UNITS) - for bitshifting
-                .eqv    WIDTH_IN_UNITS_LOG_TWO, 6
+                    .eqv    WIDTH_IN_UNITS_LOG_TWO, 6
     # The width of the display in bytes(ie width in units * 4).
-                .eqv    WIDTH_IN_BYTES, 256
+                    .eqv    WIDTH_IN_BYTES, 256
 
     # The height of a grid block in pixels.
-                .eqv    GRID_HEIGHT_IN_UNITS, 4
-                .eqv    GRID_WIDTH_IN_UNITS, 4
-                .eqv    GRID_WIDTH_IN_UNITS_LOG_2, 2
+                    .eqv    GRID_HEIGHT_IN_UNITS, 4
+                    .eqv    GRID_WIDTH_IN_UNITS, 4
+                    .eqv    GRID_WIDTH_IN_UNITS_LOG_2, 2
 
     # Constants defining the top-left corner of the playing area.
-                .eqv    PLAYING_AREA_START_X_IN_UNITS, 4
-                .eqv    PLAYING_AREA_START_Y_IN_UNITS, 16
+                    .eqv    PLAYING_AREA_START_X_IN_UNITS, 4
+                    .eqv    PLAYING_AREA_START_Y_IN_UNITS, 16
 
     # Constants defining the size of the playing area.
-                .eqv    PLAYING_AREA_WIDTH_IN_UNITS, 56
-                .eqv    PLAYING_AREA_HEIGHT_IN_UNITS, 108
+                    .eqv    PLAYING_AREA_WIDTH_IN_UNITS, 56
+                    .eqv    PLAYING_AREA_HEIGHT_IN_UNITS, 108
 
-                .eqv    PLAYING_AREA_WIDTH_IN_BLOCKS, 14
-                .eqv    PLAYING_AREA_HEIGHT_IN_BLOCKS, 27
+                    .eqv    PLAYING_AREA_WIDTH_IN_BLOCKS, 14
+                    .eqv    PLAYING_AREA_HEIGHT_IN_BLOCKS, 27
 
     # Colour constants.
-                .eqv    DARK_GREY, 0x7e7e7e
-                .eqv    LIGHT_GREY, 0xbcbcbc
-                .eqv    TETROMINO_COLOUR, 0x05ffa3
+                    .eqv    DARK_GREY, 0x7e7e7e
+                    .eqv    LIGHT_GREY, 0xbcbcbc
+                    .eqv    TETROMINO_COLOUR, 0x05ffa3
 
     # The time to sleep between frames in milliseconds.
-                .eqv    SLEEP_TIME_IN_MS, 150
+                    .eqv    SLEEP_TIME_IN_MS, 150
+
+                    .eqv    MMIO_KEY_PRESSED_STATUS, 0xffff0000
+                    .eqv    MMIO_KEY_PRESSED_VALUE, 0xffff0004
 
     ##############################################################################
     # Mutable Data
     ##############################################################################
 
     # Data for the current tetromino(ct) being moved by the player
-ct_x:           .word   6
-ct_y:           .word   0
-ct_colour:      .word   0x05ffa3
+ct_x:               .word   6
+ct_y:               .word   0
+ct_colour:          .word   0x05ffa3
     # up to a 4x4 grid. Each block is 1 byte.
     # currently the L piece (todo: change this later)
     # this is rows listed in order
     # 0 means the block is empty, 1 means it's filled
-ct_grid:        .byte   0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0
-ct_auxiliary_grid: .space 16
-ct_grid_size:   .word   3
-# Grid of all tetromino blocks which have been placed.
-tetromino_grid: .space 378
+ct_grid:            .byte   0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0
+ct_auxiliary_grid:  .space  16
+ct_grid_size:       .word   3
+    # Grid of all tetromino blocks which have been placed.
+tetromino_grid:     .space  378
 
     ##############################################################################
     # Code
     ##############################################################################
 .text   
-                .globl  main
+                    .globl  main
 
     # Run the Tetris game.
-main:           
+main:               
     # Initialize the game
 
-game_loop:      
+game_loop:          
     # 1a. Check if key has been pressed
     # 1b. Check which key has been pressed
+
+    li      $t0,            MMIO_KEY_PRESSED_STATUS                                         # $t0 = MMIO_KEY_PRESSED_STATUS
+    lw      $t1,            0($t0)                                                          # $t1 = *MMIO_KEY_PRESSED_STATUS
+    # t1 stores 1 if a key has been pressed
+
+    bne     $t1,            1,                              NO_KEY_PRESSED                  # if $t1 != 1 then goto NO_KEY_PRESSED
+    lw      $t0,            4($t0)                                                          # $t0 = *MMIO_KEY_PRESSED_VALUE
+    # t0 stores the ascii value of the key pressed
+
+    beq     $t0,            0x77,                           W_PRESSED                       # if $t0 == 'w' then goto W_PRESSED
+    beq     $t0,            0x61,                           A_PRESSED                       # if $t0 == 'a' then goto A_PRESSED
+    beq     $t0,            0x64,                           D_PRESSED                       # if $t0 == 'd' then goto D_PRESSED
+    beq     $t0,            0x73,                           S_PRESSED                       # if $t0 == 's' then goto S_PRESSED
+
+W_PRESSED:          
+    jal     rotate_ct_cw                                                                    # rotate the current tetromino clockwise
+    j       NO_KEY_PRESSED                                                                  # jump to NO_KEY_PRESSED
+
+A_PRESSED:          
+    jal     move_left                                                                       # move the current tetromino left
+    j       NO_KEY_PRESSED                                                                  # jump to NO_KEY_PRESSED
+
+D_PRESSED:          
+    jal     move_right                                                                      # move the current tetromino right
+    j       NO_KEY_PRESSED                                                                  # jump to NO_KEY_PRESSED
+
+S_PRESSED:          
+    jal     move_down                                                                       # move the current tetromino down
+    j       NO_KEY_PRESSED                                                                  # jump to NO_KEY_PRESSED
+
+NO_KEY_PRESSED:     
+
     # 2a. Check for collisions
     # 2b. Update locations (paddle, ball)
     # 3. Draw the screen
 
-DRAW_SCREEN:    
+DRAW_SCREEN:        
     # Draw the checkered pattern
     li      $a0,            PLAYING_AREA_START_X_IN_UNITS                                   # $a0 = PLAYING_AREA_START_X_IN_UNITS
     li      $a1,            PLAYING_AREA_START_Y_IN_UNITS                                   # $a1 = PLAYING_AREA_START_Y_IN_UNITS
@@ -143,10 +178,10 @@ DRAW_SCREEN:
     # Calculate the bottommost y coordinate of the playing area
     addi    $s1,            $a1,                            PLAYING_AREA_HEIGHT_IN_UNITS    # $s1 = $a1 + PLAYING_AREA_HEIGHT_IN_UNITS
 
-DRAW_ROWS_LOOP: 
+DRAW_ROWS_LOOP:     
     bge     $a1,            $s1,                            END_DRAW_PLAYING_AREA           # if $a1 >= $s1 then goto END_DRAW_PLAYING_AREA
 
-DRAW_ROW_LOOP:  
+DRAW_ROW_LOOP:      
     bge     $a0,            $s0,                            END_DRAW_ROW                    # if $a0 >= $s0 then goto END_DRAW_ROW
 
     # Draw a light grey square iff the current x and y coordinates are both odd or both even
@@ -171,19 +206,19 @@ DRAW_LIGHT_GREY_SQUARE:
 DRAW_DARK_GREY_SQUARE:
     li      $t1,            DARK_GREY                                                       # $t1 = DARK_GREY
 
-DRAW_SQUARE:    
+DRAW_SQUARE:        
     jal     fill_rect                                                                       # fill_rect(PLAYING_AREA_HEIGHT_IN_UNITS, PLAYING_AREA_START_Y_IN_UNITS, GRID_WIDTH_IN_UNITS, GRID_HEIGHT_IN_UNITS, ADDR_DSPL, LIGHT_GREY)
 
     # Restore modified registers
     li      $a3,            GRID_HEIGHT_IN_UNITS                                            # $a3 = GRID_HEIGHT_IN_UNITS
 
-INCREMENT_X:    
+INCREMENT_X:        
     # Shift x to the right by GRID_WIDTH_IN_UNITS
     addi    $a0,            $a0,                            GRID_WIDTH_IN_UNITS             # $a0 = $a0 + GRID_WIDTH_IN_UNITS
 
     j       DRAW_ROW_LOOP                                                                   # jump to DRAW_ROW_LOOP
 
-END_DRAW_ROW:   
+END_DRAW_ROW:       
     # Move x back to the left and move y down by GRID_HEIGHT_IN_UNITS
     li      $a0,            PLAYING_AREA_START_X_IN_UNITS                                   # $a0 = PLAYING_AREA_START_X_IN_UNITS
     addi    $a1,            $a1,                            GRID_HEIGHT_IN_UNITS            # $a1 = $a1 + GRID_HEIGHT_IN_UNITS
@@ -191,7 +226,7 @@ END_DRAW_ROW:
     j       DRAW_ROWS_LOOP                                                                  # jump to DRAW_ROWS_LOOP
 
 END_DRAW_PLAYING_AREA:
-DRAW_TETROMINOS:
+DRAW_TETROMINOS:    
     # Draw the current tetromino (ct).
 
     # set the colour argument to tetromino colour
@@ -206,10 +241,10 @@ DRAW_TETROMINOS:
     lw      $s6,            ct_y
     # s3 = row of ct grid
     li      $s3,            0
-OUTER_DRAW_CT_LOOP:
+OUTER_DRAW_CT_LOOP: 
     # s4 = column of ct grid
     li      $s4,            0
-INNER_DRAW_CT_LOOP:
+INNER_DRAW_CT_LOOP: 
     # s2 = temp value for item in ct grid
     lb      $s2,            0($s1)                                                          # s2 = ct_grid[s1]
 
@@ -231,14 +266,11 @@ INNER_DRAW_CT_LOOP_FINAL:
     addi    $s3,            $s3,                            1                               # rows ++
     blt     $s3,            $s0,                            OUTER_DRAW_CT_LOOP              # loop outer while rows < gt_len
 
-    jal rotate_ct_cw # rotate the piece clockwise :)
     # Todo: draw the rest of the placed tetrominos.
 
-# Physics
-    # Apply gravity, ct_y ++
-    lw $t7, ct_y
-    addi $t7, $t7, 1
-    sw $t7, ct_y
+    # Physics
+    # Apply gravity
+    jal     move_down                                                                       # move the current tetromino down
 
     # 4. Sleep
     li      $v0,            32                                                              # $v0 = 32
@@ -248,82 +280,82 @@ INNER_DRAW_CT_LOOP_FINAL:
     # 5. Go back to 1
     b       game_loop
 
-# Rotates current tetromino clockwise.
-# Algorithm: 
-#   Consider a 2 by 2 matrix A. 
-#   Let matrix B be A rotated clockwise by 90 deg.
-#   We can create by by reading every row of A starting from the top,
-#   into every column of B starting from the right.
-#   Ie A = [1, 2; 3, 4], we read the first row into the last column of
-#   B = [x, 1; x, 2] then we read the next row of A into the previous
-#   column of B. So B = [3, 1; 2, 4] This generalizes to n by n matrices.
-#   As the array is stored in a continuous block of memory,
-#   we can just have two pointers for A and B.
-#   The pointer for A goes from 0 to n^2.
-#   The pointer for B needs to start at n-1 and then jump by n each time. 
-#   Upon exiting the bounds of the array, it needs to go back to n-2, and n-3 the next time and so on...
-# 
-# Arguments: 
-# ra = return address
-# uses registers s0 to s6, t7
-rotate_ct_cw: 
+    # Rotates current tetromino clockwise.
+    # Algorithm:
+    #   Consider a 2 by 2 matrix A.
+    #   Let matrix B be A rotated clockwise by 90 deg.
+    #   We can create by by reading every row of A starting from the top,
+    #   into every column of B starting from the right.
+    #   Ie A = [1, 2; 3, 4], we read the first row into the last column of
+    #   B = [x, 1; x, 2] then we read the next row of A into the previous
+    #   column of B. So B = [3, 1; 2, 4] This generalizes to n by n matrices.
+    #   As the array is stored in a continuous block of memory,
+    #   we can just have two pointers for A and B.
+    #   The pointer for A goes from 0 to n^2.
+    #   The pointer for B needs to start at n-1 and then jump by n each time.
+    #   Upon exiting the bounds of the array, it needs to go back to n-2, and n-3 the next time and so on...
+    #       
+    # Arguments:
+    # ra = return address
+    # uses registers s0 to s6, t7
+rotate_ct_cw:       
     # s0 = matrix length (n)
-    lw $s0, ct_grid_size
-    # s1 = starting location for pointer of B, initially 
-    add $s1, $s0, -1
+    lw      $s0,            ct_grid_size
+    # s1 = starting location for pointer of B, initially
+    add     $s1,            $s0,                            -1
     # s2 = n^2
-    mul $s2, $s0, $s0
+    mul     $s2,            $s0,                            $s0
     # s3 = pointer for A
-    li $s3, 0
+    li      $s3,            0
     # s4 = pointer for B
-    move $s4, $s1
+    move    $s4,            $s1
     # s5 = offset A
-    la $s5, ct_grid
+    la      $s5,            ct_grid
     # s6 = offset B
-    la $s6, ct_auxiliary_grid
-ROTATE_CW_LOOP:
+    la      $s6,            ct_auxiliary_grid
+ROTATE_CW_LOOP:     
     # get A's address
-    add $t8, $s3, $s5
+    add     $t8,            $s3,                            $s5
     # load the value from A
-    lb $t7, 0($t8)
+    lb      $t7,            0($t8)
 
     # get B's address
-    add $t8, $s4, $s6
+    add     $t8,            $s4,                            $s6
     # copy the value into B
-    sb $t7, 0($t8)
+    sb      $t7,            0($t8)
 
     # increment pointers
-    addi $s3, $s3, 1
-    add $s4, $s4, $s0 # ptrB += n
+    addi    $s3,            $s3,                            1
+    add     $s4,            $s4,                            $s0                             # ptrB += n
 
     # if ptrB < n^2, skip
-    blt $s4, $s2, ROTATE_NO_OVERFLOW
+    blt     $s4,            $s2,                            ROTATE_NO_OVERFLOW
     # s1 -- and set ptr B back in bounds
-    addi $s1, $s1, -1
-    move $s4, $s1
-ROTATE_NO_OVERFLOW:
-    blt $s3, $s2, ROTATE_CW_LOOP # while ptr A < n^2
+    addi    $s1,            $s1,                            -1
+    move    $s4,            $s1
+ROTATE_NO_OVERFLOW: 
+    blt     $s3,            $s2,                            ROTATE_CW_LOOP                  # while ptr A < n^2
 
     # copy data back
-    li $s1, 0
+    li      $s1,            0
 AUXILIARY_COPY_BACK_LOOP:
     # get value from B
-    add $t8, $s1, $s6
-    lb $t7, 0($t8)
+    add     $t8,            $s1,                            $s6
+    lb      $t7,            0($t8)
     # copy the value into A
-    add $t8, $s1, $s5
-    sb $t7, 0($t8)
-    addi $s1, $s1, 1
-    blt $s1, $s2, AUXILIARY_COPY_BACK_LOOP
+    add     $t8,            $s1,                            $s5
+    sb      $t7,            0($t8)
+    addi    $s1,            $s1,                            1
+    blt     $s1,            $s2,                            AUXILIARY_COPY_BACK_LOOP
 
-    jr $ra # return
+    jr      $ra                                                                             # return
 
 
     # a0 = grid x (modified)
     # a1 = grid y (modified)
     # ra = return address
     # uses registers v0 + registers needed for fill_rect
-draw_tblock:    
+draw_tblock:        
     # a0 = grid_x * GRID_WIDTH_IN_UNITS + PLAYING_AREA_START_X_IN_UNITS
     sll     $a0,            $a0,                            GRID_WIDTH_IN_UNITS_LOG_2
     add     $a0,            $a0,                            PLAYING_AREA_START_X_IN_UNITS
@@ -355,7 +387,7 @@ draw_tblock:
     # t0 = screen location
     # t1 = colour
     # uses registers t2, t3, t4
-fill_rect:      
+fill_rect:          
     # t2 = pointer of y
     # t2 = 4(start_x + 32 start_y) + display_offset
     # t2 = 4(a0 + 32a1) + t0
@@ -384,3 +416,74 @@ inner_fill_rect_loop:
 
     # link back to the program
     jr      $ra
+
+    # Move the current tetromino left.
+    # Uses registers t0, t1 and modifies ct_x
+move_left:          
+    # Load the current x position of the tetromino.
+    la      $t0,            ct_x                                                            # $t0 = &ct_x
+    lw      $t1,            0($t0)                                                          # $t0 = ct_x
+
+    # Check if the tetromino can move left.
+    blez    $t1,            MOVE_LEFT_END                                                   # if ct_x <= 0 then goto MOVE_LEFT_END
+
+    # If it can, move it left.
+SHFIT_LEFT:         
+    addi    $t1,            $t1,                            -1                              # $t1--
+    sw      $t1,            0($t0)                                                          # ct_x = $t1
+
+    # If it can't, do nothing.
+MOVE_LEFT_END:      
+    jr      $ra
+
+    # Move the current tetromino right.
+    # Uses registers t0 - t3 and modifies ct_x
+move_right:         
+    # Load the current x position of the tetromino.
+    la      $t0,            ct_x                                                            # $t0 = &ct_x
+    lw      $t1,            0($t0)                                                          # $t0 = ct_x
+
+    # Check if the tetromino can move right.
+
+    li      $t2,            PLAYING_AREA_WIDTH_IN_BLOCKS                                    # $t2 = PLAYING_AREA_WIDTH_IN_BLOCKS
+    # Now $t2 is the rightmost x block of the playing area
+
+    la      $t3,            ct_grid_size                                                    # $t3 = &ct_grid_size
+    lw      $t3,            0($t3)                                                          # $t3 = ct_grid_size
+    add     $t3,            $t1,                            $t3                             # $t3 = $t1 + $t3
+    # Now $t3 is the rightmost x block of the tetromino
+
+    bge     $t3,            $t2,                            MOVE_RIGHT_END                  # if $t3 >= $t2 then goto MOVE_RIGHT_END
+
+    # If it can, move it right.
+SHIFT_RIGHT:        
+    addi    $t1,            $t1,                            1                               # $t1++
+    sw      $t1,            0($t0)                                                          # ct_x = $t1
+
+    # If it can't, do nothing.
+MOVE_RIGHT_END:     
+    jr      $ra
+
+    # Move the current tetromino down.
+    # Uses registers t0 - t3 and modifies ct_y
+move_down:          
+    # Load the current y position of the tetromino.
+    la      $t0,            ct_y                                                            # $t0 = &ct_y
+    lw      $t1,            0($t0)                                                          # $t0 = ct_y
+    la      $t2,            ct_grid_size                                                    # $t2 = &ct_grid_size
+    lw      $t2,            0($t2)                                                          # $t2 = ct_grid_size
+    add     $t3,            $t1,                            $t2                             # $t3 = $t1 + $t2
+    # Now $t3 is the bottommost y block of the tetromino
+
+    li      $t2,            PLAYING_AREA_HEIGHT_IN_BLOCKS                                   # $t2 = PLAYING_AREA_HEIGHT_IN_BLOCKS
+    # Now $t2 is the bottommost y block of the playing area
+
+    bge     $t3,            $t2,                            MOVE_DOWN_END                   # if $t1 >= $t2 then goto MOVE_DOWN_END
+
+    # Move the tetromino down.
+SHIFT_DOWN:         
+    addi    $t1,            $t1,                            1                               # $t1++
+    sw      $t1,            0($t0)                                                          # ct_y = $t1
+
+MOVE_DOWN_END:      
+    jr      $ra                                                                             # return
