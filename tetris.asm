@@ -105,6 +105,7 @@ ct_colour:      .word   0x05ffa3
     # this is rows listed in order
     # 0 means the block is empty, 1 means it's filled
 ct_grid:        .byte   0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0
+ct_auxiliary_grid: .space 16
 ct_grid_size:   .word   3
 
     ##############################################################################
@@ -228,6 +229,7 @@ INNER_DRAW_CT_LOOP_FINAL:
     addi    $s3,            $s3,                            1                               # rows ++
     blt     $s3,            $s0,                            OUTER_DRAW_CT_LOOP              # loop outer while rows < gt_len
 
+    jal rotate_ct_cw # rotate the piece clockwise :)
     # Todo: draw the rest of the placed tetrominos.
 
     # 4. Sleep
@@ -238,9 +240,79 @@ INNER_DRAW_CT_LOOP_FINAL:
     # 5. Go back to 1
     b       game_loop
 
+# Rotates current tetromino clockwise.
+# Algorithm: 
+#   Consider a 2 by 2 matrix A. 
+#   Let matrix B be A rotated clockwise by 90 deg.
+#   We can create by by reading every row of A starting from the top,
+#   into every column of B starting from the right.
+#   Ie A = [1, 2: 3, 4], we read the first row into the last column of
+#   B = [x, 1: x, 2] then we read the next row of A into the previous
+#   column of B. So B = [3, 1; 2, 4] This generalizes to n by n matrices.
+#   As the array is stored in a continuous block of memory,
+#   we can just have two pointers for A and B.
+#   The pointer for A goes from 0 to n^2.
+#   The pointer for B needs to start at n-1 and then jump by n each time. 
+#   Upon exiting the bounds of the array, it needs to go back to n-2, and n-3 the next time and so on...
+# 
+# Arguments: 
+# ra = return address
+# uses registers s0 to s6, t7
+rotate_ct_cw: 
+    # s0 = matrix length (n)
+    lw $s0, ct_grid_size
+    # s1 = starting location for pointer of B, initially 
+    add $s1, $s0, -1
+    # s2 = n^2
+    mul $s2, $s0, $s0
+    # s3 = pointer for A
+    li $s3, 0
+    # s4 = pointer for B
+    move $s4, $s1
+    # s5 = offset A
+    la $s5, ct_grid
+    # s6 = offset B
+    la $s6, ct_auxiliary_grid
+ROTATE_CW_LOOP:
+    # get A's address
+    add $t8, $s3, $s5
+    # load the value from A
+    lb $t7, 0($t8)
 
-    # a0 = grid x
-    # a1 = grid y
+    # get B's address
+    add $t8, $s4, $s6
+    # copy the value into B
+    sb $t7, 0($t8)
+
+    # increment pointers
+    addi $s3, $s3, 1
+    add $s4, $s4, $s0 # ptrB += n
+
+    # if ptrB < n^2, skip
+    blt $s4, $s2, ROTATE_NO_OVERFLOW
+    # s1 -- and set ptr B back in bounds
+    addi $s1, $s1, -1
+    move $s4, $s1
+ROTATE_NO_OVERFLOW:
+    blt $s3, $s2, ROTATE_CW_LOOP # while ptr A < n^2
+
+    # copy data back
+    li $s1, 0
+AUXILIARY_COPY_BACK_LOOP:
+    # get value from B
+    add $t8, $s1, $s6
+    lb $t7, 0($t8)
+    # copy the value into A
+    add $t8, $s1, $s5
+    sb $t7, 0($t8)
+    addi $s1, $s1, 1
+    blt $s1, $s2, AUXILIARY_COPY_BACK_LOOP
+
+    jr $ra # return
+
+
+    # a0 = grid x (modified)
+    # a1 = grid y (modified)
     # ra = return address
     # uses registers v0 + registers needed for fill_rect
 draw_tblock:    
