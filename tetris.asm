@@ -1,7 +1,7 @@
 #####################################################################
 # CSCB58 Summer 2024 Assembly Final Project - UTSC
-# Student1: Name, Student Number, UTorID, official email
-# Student2: Name, Student Number, UTorID, official email
+# Student1: Brook Mao, Student Number, maofengx, brook.mao@mail.utoronto.ca
+# Student2: Richard Zhang, 1010423276, zha15296, zecro.zhang@mail.utoronto.ca
 #
 # Bitmap Display Configuration:
 # - Unit width in pixels: 4 (update this as needed) 
@@ -63,10 +63,15 @@ ADDR_KBRD:
 
 # The width of the display in unit widths.
 .eqv WIDTH_IN_UNITS 64
+# log_2(WIDTH_IN_UNITS) - for bitshifting
+.eqv WIDTH_IN_UNITS_LOG_TWO 6
+# The width of the display in bytes(ie width in units * 4).
+.eqv WIDTH_IN_BYTES 256
 
-# The height of the display in pixels.
+# The height of a grid block in pixels.
 .eqv GRID_HEIGHT_IN_UNITS 4
 .eqv GRID_WIDTH_IN_UNITS 4
+.eqv GRID_WIDTH_IN_UNITS_LOG_2 2
 
 # Constants defining the top-left corner of the playing area.
 .eqv PLAYING_AREA_START_X_IN_UNITS 4
@@ -76,9 +81,13 @@ ADDR_KBRD:
 .eqv PLAYING_AREA_WIDTH_IN_UNITS 56
 .eqv PLAYING_AREA_HEIGHT_IN_UNITS 120
 
+.eqv PLAYING_AREA_WIDTH_IN_BLOCKS 14
+.eqv PLAYING_AREA_HEIGHT_IN_BLOCKS 30
+
 # Colour constants.
 .eqv DARK_GREY 0x7e7e7e
 .eqv LIGHT_GREY 0xbcbcbc
+.eqv TETROMINO_COLOUR 0x05ffa3
 
 # The time to sleep between frames in milliseconds.
 .eqv SLEEP_TIME_IN_MS 1000
@@ -86,6 +95,17 @@ ADDR_KBRD:
 ##############################################################################
 # Mutable Data
 ##############################################################################
+
+# Data for the current tetromino(ct) being moved by the player
+ct_x: .word 0
+ct_y: .word 0
+ct_colour: .word 0x05ffa3
+# up to a 4x4 grid. Each block is 1 byte. 
+# currently the L piece (todo: change this later)
+# this is rows listed in order
+# 0 means the block is empty, 1 means it's filled
+ct_grid: .byte 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0
+ct_grid_size: .word 3
 
 ##############################################################################
 # Code
@@ -168,14 +188,83 @@ END_DRAW_ROW:
     j		DRAW_ROWS_LOOP                          # jump to DRAW_ROWS_LOOP
 
 END_DRAW_PLAYING_AREA:
+DRAW_TETROMINOS:
+    # Draw the current tetromino (ct).
+
+    # set the colour argument to tetromino colour
+    li $t1, TETROMINO_COLOUR
+    # s0 = length and width of the tetromino grid
+    lw $s0, ct_grid_size
+    # s1 = array representing tetromino piece
+    la $s1, ct_grid
+    # s5 = x position of tetromino on the grid
+    lw $s5, ct_x
+    # s6 = y position of tetromino on the grid
+    lw $s6, ct_y
+    # s3 = row of ct grid
+    li $s3, 0
+OUTER_DRAW_CT_LOOP:
+    # s4 = column of ct grid
+    li $s4, 0
+INNER_DRAW_CT_LOOP:
+    # s2 = temp value for item in ct grid
+    lb $s2, 0($s1) # s2 = ct_grid[s1]
+
+    # continue if this block is not part of the ct
+    beq $s2, $0, INNER_DRAW_CT_LOOP_FINAL
+
+    # start_x = col + grid_x
+    add $a0, $s4, $s5
+    # start_y = row + grid_y
+    add $a1, $s3, $s6
+    jal draw_tblock
+INNER_DRAW_CT_LOOP_FINAL:
+    addi $s4, $s4, 1 # col ++
+    addi $s1, $s1, 1 # move ct grid pointer to next byte
+    
+    # loop inner loop again while col < gt_len
+    blt $s4, $s0, INNER_DRAW_CT_LOOP
+
+    addi $s3, $s3, 1 # rows ++
+    blt $s3, $s0, OUTER_DRAW_CT_LOOP # loop outer while rows < gt_len
+
+    # Todo: draw the rest of the placed tetrominos.
 
 	# 4. Sleep
     li		$v0, 32		# $v0 = 32
     li		$a0, SLEEP_TIME_IN_MS		# $a0 = SLEEP_TIME_IN_MS
     syscall		# syscall(32, SLEEP_TIME_IN_MS)
 
-    #5. Go back to 1
+    # 5. Go back to 1
     b game_loop
+
+
+# a0 = grid x
+# a1 = grid y
+# ra = return address
+# uses registers v0 + registers needed for fill_rect
+draw_tblock:
+    # a0 = grid_x * GRID_WIDTH_IN_UNITS + PLAYING_AREA_START_X_IN_UNITS
+    sll $a0, $a0, GRID_WIDTH_IN_UNITS_LOG_2
+    add $a0, $a0, PLAYING_AREA_START_X_IN_UNITS
+
+    # a1 = same computations for x but for y
+    # grid and unit are assumed to be squares
+    sll $a1, $a1, GRID_WIDTH_IN_UNITS_LOG_2
+    add $a1, $a1, PLAYING_AREA_START_Y_IN_UNITS
+
+    # load the width/height of the grid blocks
+    li $a2, GRID_WIDTH_IN_UNITS
+    li $a3, GRID_HEIGHT_IN_UNITS
+
+    # save the return address and call fill_rect 
+    move $v0, $ra
+    jal fill_rect
+
+    # return to caller
+    move $ra, $v0
+    jr $v0
+
 
 # arguments: a0 to a3, v0 and t0, t1
 # a0 = start x
@@ -190,7 +279,7 @@ fill_rect:
     # t2 = pointer of y
     # t2 = 4(start_x + 32 start_y) + display_offset
     # t2 = 4(a0 + 32a1) + t0
-    sll $t2, $a1, 6 # a1 * 32
+    sll $t2, $a1, WIDTH_IN_UNITS_LOG_TWO # a1 * 32
     add $t2, $t2, $a0 # a0 + 32a1
     sll $t2, $t2, 2 # 4(a0 + 32a1)
     add $t2, $t2, $t0
@@ -208,7 +297,7 @@ inner_fill_rect_loop:
     bgtz $a2, inner_fill_rect_loop
 
 # outer loop end
-    addi $t2, $t2, 256 # increment the y pointer to the next line (this is the start x position)
+    addi $t2, $t2, WIDTH_IN_BYTES # increment the y pointer to the next line (this is the start x position)
     addi $a3, $a3, -1 # decrease height
     move $a2, $t4 # restore the width
     bgtz $a3, outer_fill_rect_loop
