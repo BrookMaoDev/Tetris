@@ -90,7 +90,7 @@ ADDR_KBRD:
                     .eqv    TETROMINO_COLOUR, 0x05ffa3
 
     # The time to sleep between frames in milliseconds.
-                    .eqv    SLEEP_TIME_IN_MS, 150
+                    .eqv    SLEEP_TIME_IN_MS, 300
 
                     .eqv    MMIO_KEY_PRESSED_STATUS, 0xffff0000
                     .eqv    MMIO_KEY_PRESSED_VALUE, 0xffff0004
@@ -159,6 +159,10 @@ S_PRESSED:
 NO_KEY_PRESSED:     
 
     # 2a. Check for collisions
+
+    # Bound the current tetromino horizontally.
+    jal bound_ct_horizontally
+
     # 2b. Update locations (paddle, ball)
     # 3. Draw the screen
 
@@ -350,6 +354,61 @@ AUXILIARY_COPY_BACK_LOOP:
 
     jr      $ra                                                                             # return
 
+# Places the tetromino block back in bounds based on the pixels.
+# Arguments:
+# ra = return address
+# uses registers t0 to t9
+bound_ct_horizontally:
+    lw $t0, ct_x # t0 = current tetromino x
+    la $t1, ct_grid # t1 = grid address
+    lw $t2, ct_grid_size # t2 = grid size (n)
+    mul $t3, $t2, $t2 # t3 = n^2
+    # t4 = playing area width in blocks
+    li $t4, PLAYING_AREA_WIDTH_IN_UNITS 
+    sra $t4, $t4, GRID_WIDTH_IN_UNITS_LOG_2 # so it's measured in blocks and not units
+    li $t5, 0 # t5 = x
+OUTER_HORIZONTAL_COLLISION_LOOP: 
+    # addi $t4, $t4, -1 # start y --
+    move $t6, $t5 # t6 = pointer of the grid (not really y)
+    li $t7, 0 # t7 = occurences of blocks in this column
+INNER_HORIZONTAL_COLLISION_LOOP:
+    # check if the grid block at the current x, y is occupied.
+    # t8 = (grid[pointer] > 0)
+    add $t8, $t6, $t1 # t8 = grid pointer + grid mem addr
+    lb $t8, 0($t8) 
+    slt $t8, $0, $t8 # t8 = 0 < t8
+
+    # if t8 > 0, occurences ++
+    add $t7, $t7, $t8
+
+    add $t6, $t6, $t2 # y += n
+
+    # loop while y < n^2
+    blt $t6, $t3, INNER_HORIZONTAL_COLLISION_LOOP
+
+    # if occurences > 0, do the following
+    beq $t7, $0, NO_GRID_BLOCK_ON_BOUNDS_CHECK
+    add $t9, $t0, $t5 # x' = position of the block on the board, ie ct_x + x
+    
+    # if x' < 0, then ct_x = -x (back in bounds from the left)
+    ble $0, $t9, NOT_OUT_OF_LEFT_BOUNDS
+    sub $t0, $0, $t5
+NOT_OUT_OF_LEFT_BOUNDS:
+    # if x' >= grid width, ct_x = grid width - x - 1 (back in bounds on the right)
+    blt $t9, $t4, NOT_OUT_OF_RIGHT_BOUNDS
+    sub $t0, $t4, $t5
+    addi $t0, $t0, -1
+NOT_OUT_OF_RIGHT_BOUNDS:
+NO_GRID_BLOCK_ON_BOUNDS_CHECK:
+    addi $t5, $t5, 1 # x ++
+    # loop while x < n
+    blt $t5, $t2, OUTER_HORIZONTAL_COLLISION_LOOP
+
+    # assign the new in bounds ct_x value. 
+    sw $t0, ct_x
+
+    jr $ra
+
 
     # a0 = grid x (modified)
     # a1 = grid y (modified)
@@ -424,16 +483,11 @@ move_left:
     la      $t0,            ct_x                                                            # $t0 = &ct_x
     lw      $t1,            0($t0)                                                          # $t0 = ct_x
 
-    # Check if the tetromino can move left.
-    blez    $t1,            MOVE_LEFT_END                                                   # if ct_x <= 0 then goto MOVE_LEFT_END
-
-    # If it can, move it left.
+    # Move it left.
 SHFIT_LEFT:         
     addi    $t1,            $t1,                            -1                              # $t1--
     sw      $t1,            0($t0)                                                          # ct_x = $t1
-
-    # If it can't, do nothing.
-MOVE_LEFT_END:      
+ 
     jr      $ra
 
     # Move the current tetromino right.
@@ -443,25 +497,11 @@ move_right:
     la      $t0,            ct_x                                                            # $t0 = &ct_x
     lw      $t1,            0($t0)                                                          # $t0 = ct_x
 
-    # Check if the tetromino can move right.
-
-    li      $t2,            PLAYING_AREA_WIDTH_IN_BLOCKS                                    # $t2 = PLAYING_AREA_WIDTH_IN_BLOCKS
-    # Now $t2 is the rightmost x block of the playing area
-
-    la      $t3,            ct_grid_size                                                    # $t3 = &ct_grid_size
-    lw      $t3,            0($t3)                                                          # $t3 = ct_grid_size
-    add     $t3,            $t1,                            $t3                             # $t3 = $t1 + $t3
-    # Now $t3 is the rightmost x block of the tetromino
-
-    bge     $t3,            $t2,                            MOVE_RIGHT_END                  # if $t3 >= $t2 then goto MOVE_RIGHT_END
-
-    # If it can, move it right.
+    # Move it right.
 SHIFT_RIGHT:        
     addi    $t1,            $t1,                            1                               # $t1++
     sw      $t1,            0($t0)                                                          # ct_x = $t1
 
-    # If it can't, do nothing.
-MOVE_RIGHT_END:     
     jr      $ra
 
     # Move the current tetromino down.
