@@ -1,6 +1,6 @@
  #####################################################################
     # CSCB58 Summer 2024 Assembly Final Project - UTSC
-    # Student1: Brook Mao, Student Number, maofengx, brook.mao@mail.utoronto.ca
+    # Student1: Brook Mao, 1010146815, maofengx, brook.mao@mail.utoronto.ca
     # Student2: Richard Zhang, 1010423276, zha15296, zecro.zhang@mail.utoronto.ca
     #       
     # Bitmap Display Configuration:
@@ -153,16 +153,14 @@ main:
 
 game_loop: 
     # 1a. Check if key has been pressed
-    # 1b. Check which key has been pressed
-
     li $t0, MMIO_KEY_PRESSED_STATUS # $t0 = MMIO_KEY_PRESSED_STATUS
     lw $t1, 0($t0) # $t1 = *MMIO_KEY_PRESSED_STATUS
     # t1 stores 1 if a key has been pressed
-
     bne $t1, 1, NO_KEY_PRESSED # if $t1 != 1 then goto NO_KEY_PRESSED
     lw $t0, 4($t0) # $t0 = *MMIO_KEY_PRESSED_VALUE
     # t0 stores the ascii value of the key pressed
 
+    # 1b. Check which key has been pressed
     beq $t0, 0x77, W_PRESSED # if $t0 == 'w' then goto W_PRESSED
     beq $t0, 0x61, A_PRESSED # if $t0 == 'a' then goto A_PRESSED
     beq $t0, 0x64, D_PRESSED # if $t0 == 'd' then goto D_PRESSED
@@ -335,6 +333,7 @@ INNER_DRAW_CT_LOOP_FINAL:
     # Physics
     # Apply gravity
     jal move_down # move the current tetromino down
+    jal clear_lines # clear any lines that are full
 
     # 4. Sleep
     li $v0, 32 # $v0 = 32
@@ -802,3 +801,44 @@ SHADOW_IMAGE_WORD_LOAD_NOT_NEEDED:
     bgtz $t2, OUTER_DRAW_SHADOW_LOOP
 
     jr $ra # return
+
+# Detects if a line is full and if so, clears it.
+# Uses registers t0 to t5 and $ra
+clear_lines:
+# What row we are currently checking
+li		$t0, 0		# $t0 = 0
+li		$t2, PLAYING_AREA_WIDTH_IN_BLOCKS		# $t2 = PLAYING_AREA_WIDTH_IN_BLOCKS
+li		$t5, PLAYING_AREA_HEIGHT_IN_BLOCKS		# $t5 = PLAYING_AREA_HEIGHT_IN_BLOCKS
+
+LOOP_THROUGH_ROWS_TO_CLEAR:
+# What column we are currently checking within the row
+li		$t1, 0		# $t1 = 0
+
+LOOP_THROUGH_ROW_TO_CLEAR:
+mult	$t0, $t2			# $t0 * $t2 = Hi and Lo registers
+mflo	$t3					# copy Lo to $t3
+add		$t3, $t3, $t1		# $t3 = $t3 + $t1
+# Now $t3 is the index of the current block in the row within the tetromino grid
+la		$t4, tetromino_grid		# $t4 = &tetromino_grid
+add		$t4, $t4, $t3		# $t4 = $t4 + $t3
+# Now $t4 is the address of the current block in the row within the tetromino grid
+lb      $t4, 0($t4)		# $t4 = tetromino_grid[t4]
+beq		$t4, $zero, END_LOOP_THROUGH_ROW_TO_CLEAR		# if $t4 == $zero then goto END_LOOP_THROUGH_ROW_TO_CLEAR
+
+addi	$t1, $t1, 1			# $t1 = $t1 + 1
+bge		$t1, $t2, CLEAR_ROW		# if $t1 >= $t2 then goto CLEAR_ROW
+j		LOOP_THROUGH_ROW_TO_CLEAR				# jump to LOOP_THROUGH_ROW_TO_CLEAR
+
+CLEAR_ROW:
+# Clear the row
+li		$v0, 1		# $v0 = 1
+move 	$a0, $t0		# $a0 = $t0
+syscall        # syscall(1, $t0)
+
+END_LOOP_THROUGH_ROW_TO_CLEAR:
+addi	$t0, $t0, 1			# $t0 = $t0 + 1
+bge		$t0, $t5, END_LOOP_THROUGH_ROWS_TO_CLEAR	# if $t0 >= $t5 then goto END_LOOP_THROUGH_ROWS_TO_CLEAR
+j       LOOP_THROUGH_ROWS_TO_CLEAR		# jump to LOOP_THROUGH_ROWS_TO_CLEAR
+
+END_LOOP_THROUGH_ROWS_TO_CLEAR:
+jr		$ra		# return
