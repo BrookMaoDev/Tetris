@@ -830,10 +830,24 @@ bge		$t1, $t2, CLEAR_ROW		# if $t1 >= $t2 then goto CLEAR_ROW
 j		LOOP_THROUGH_ROW_TO_CLEAR				# jump to LOOP_THROUGH_ROW_TO_CLEAR
 
 CLEAR_ROW:
-# Clear the row
-li		$v0, 1		# $v0 = 1
-move 	$a0, $t0		# $a0 = $t0
-syscall        # syscall(1, $t0)
+# What column we are currently checking within the row
+li		$t1, 0		# $t1 = 0
+
+CLEAR_ROW_LOOP:
+# Clear the row $t0
+mult	$t0, $t2			# $t0 * $t2 = Hi and Lo registers
+mflo	$t3					# copy Lo to $t3
+
+add		$t3, $t3, $t1		# $t3 = $t3 + $t1
+la		$t4, tetromino_grid		# $t4 = &tetromino_grid
+add		$t4, $t4, $t3		# $t4 = $t4 + $t3
+# Now $t4 is the address of the block in tetromino grid that we want to clear
+li		$t3, 0		# $t3 = 0
+sb		$t3, 0($t4)		# $t4 = 0
+
+addi    $t1, $t1, 1			# $t1 = $t1 + 1
+bge		$t1, $t2, END_LOOP_THROUGH_ROW_TO_CLEAR		# if $t1 >= $t2 then goto END_CLEAR_ROW_LOOP
+j		CLEAR_ROW_LOOP		# jump to CLEAR_ROW_LOOP
 
 END_LOOP_THROUGH_ROW_TO_CLEAR:
 addi	$t0, $t0, 1			# $t0 = $t0 + 1
