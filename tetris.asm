@@ -152,6 +152,11 @@ main:
     jal draw_shadow
 
 game_loop: 
+
+    # save the current tetromino position in s0, s1 so it can be undone.
+    lw $s0, ct_x
+    lw $s1, ct_y
+
     # 1a. Check if key has been pressed
     li $t0, MMIO_KEY_PRESSED_STATUS # $t0 = MMIO_KEY_PRESSED_STATUS
     lw $t1, 0($t0) # $t1 = *MMIO_KEY_PRESSED_STATUS
@@ -185,9 +190,13 @@ S_PRESSED:
 NO_KEY_PRESSED: 
 
     # 2a. Check for collisions
+    jal ct_is_colliding # v0 = 1 means colliding
 
-    # Bound the current tetromino horizontally.
-    jal bound_ct_horizontally
+    # if v0 = 1, then cancel the previous move.
+    beq $v0, $0, MOVE_IS_LEGAL
+    sw $s0, ct_x
+    sw $s1, ct_y
+MOVE_IS_LEGAL:
 
     # 2b. Update locations (paddle, ball)
     # 3. Draw the screen
@@ -468,6 +477,85 @@ NO_GRID_BLOCK_ON_BOUNDS_CHECK:
 
     jr $ra
 
+ct_is_colliding:
+    # Putting doc comments in here.
+    # Arguments:
+    # 
+    # Returns: v0
+    # uses registers t0 to t8, a0, a1
+
+    li $t0, PLAYING_AREA_WIDTH_IN_BLOCKS # t0 = playing area width
+    li $t1, PLAYING_AREA_HEIGHT_IN_BLOCKS # t1 = playing area height
+    lw $t2, ct_grid_size # t2 = ct grid size 
+    lw $t3, ct_x # t3 = ct x
+    lw $t4, ct_y # t4 = ct y
+    la $t5, ct_grid # t5 = ct grid address
+
+    # t6 = 4(ct_y * board_width + ct_x) + address
+    mul $t6, $t4, $t0 
+    add $t6, $t6, $t3 
+    # sll $t6, $t6, 2 # add back after colour is added
+    la $t8, tetromino_grid
+    add $t6, $t6, $t8
+
+    # t7 = 4(board_width - grid_width)
+    sub $t7, $t0, $t2
+    # sll $t7, $t7, 2 # add back after color update
+
+    li $a0, 0 # a0 = y
+
+CT_COLLIDING_OUTER_LOOP:
+    li $a1, 0 # a1 = x
+    lw $t3, ct_x # t3 = ct x
+
+CT_COLLIDING_INNER_LOOP:
+    # if the current ct grid has a block(ie > 0), then
+    lb $t8, 0($t5)
+    blez $t8, CT_COLLIDING_INNER_LOOP_END
+    
+    # if ct_x < 0 or ct_y < 0 or board_width <= ct_x or board_height <= ct_y, return colliding
+    blt $t3, 0, COLLISION_OUT_OF_BOUNDS
+    blt $t4, 0, COLLISION_OUT_OF_BOUNDS
+    ble $t0, $t3, COLLISION_OUT_OF_BOUNDS
+    ble $t1, $t4, COLLISION_OUT_OF_BOUNDS
+    j COLLISION_IN_BOUNDS # otherwise, continue checking
+COLLISION_OUT_OF_BOUNDS:
+    # set return value to colliding and return
+    li $v0, 1
+    jr $ra
+COLLISION_IN_BOUNDS:
+    # check if the tetromino grid has a block occupying this coordinate.
+    # lw $t8, 0($t6) #word?
+    lb $t8, 0($t6) # fix after colour update
+
+    # if this unit is occupied, return collidin
+    beq $t8, $0, COLLISION_UNIT_NOT_OCCUPIED
+    li $v0, 1
+    jr $ra
+COLLISION_UNIT_NOT_OCCUPIED:
+CT_COLLIDING_INNER_LOOP_END:
+    # increment x, c_x, grid_ptr, board_pointer (in that order)
+    addi $a1, $a1, 1
+    addi $t3, $t3, 1
+    addi $t5, $t5, 1
+    # addi $t6, $t6, 4 # 4?
+    addi $t6, $t6, 1 # remove on colour update
+
+    # loop while x < n
+    blt $a1, $t2, CT_COLLIDING_INNER_LOOP
+
+    # increment c_y, y
+    addi $t4, $t4, 1
+    addi, $a0, $a0, 1
+
+    # board pointer needs to be incremented by (board_width - n) to get to the starting x of the next loop.
+    add $t6, $t6, $t7
+
+    # loop while y < n
+    blt $a0, $t2, CT_COLLIDING_OUTER_LOOP
+
+    li $v0, 0
+    jr $ra
 
     # a0 = grid x (modified)
     # a1 = grid y (modified)
@@ -568,34 +656,36 @@ SHIFT_RIGHT:
 move_down: 
     # Load the current y position of the tetromino.
     la $t0, ct_y # $t0 = &ct_y
-    lw $t1, 0($t0) # $t0 = ct_y
-    la $t2, ct_grid_size # $t2 = &ct_grid_size
-    lw $t2, 0($t2) # $t2 = ct_grid_size
-    add $t3, $t1, $t2 # $t3 = $t1 + $t2
-    # Now $t3 is the bottommost y block of the tetromino
+    lw $t1, 0($t0) # $t1 = ct_y
+    addi $t1, $t1, 1 # $t1++
 
-    li $t2, PLAYING_AREA_HEIGHT_IN_BLOCKS # $t2 = PLAYING_AREA_HEIGHT_IN_BLOCKS
-    # Now $t2 is the bottommost y block of the playing area
+    addi $sp, $sp, -4 # inc stack.
+    sw $ra, 0($sp) # add ra to the stack.
 
-    bge $t3, $t2, HIT_BOTTOM # if $t3 >= $t2 then goto STORE_TETROMINO
+    # save modified ct_y
+    sw $t1, ct_y
+
+    # check if it's colliding with something.
+    jal ct_is_colliding
+    bne $v0, $0, HIT_BOTTOM # v0 = 1 means it's colliding, so goto STORE_TETROMINO
 
     # Move the tetromino down.
 SHIFT_DOWN: 
-    addi $t1, $t1, 1 # $t1++
-    sw $t1, 0($t0) # ct_y = $t1
     j MOVE_DOWN_END # jump to MOVE_DOWN_END
 
 HIT_BOTTOM: 
-    addi $sp, $sp, -4 # $sp = $sp + 1
-    sw $ra, 0($sp) # save $ra to stack
+    # undo the modification of ct_y
+    lw $t1, ct_y
+    addi $t1, $t1, -1
+    sw $t1, ct_y # ct_y = $t1
 
     jal save_tetromino # jump to save_tetromino and save position to $ra
     jal spawn_new_tetromino # jump to spawn_new_tetromino and spawn a new tetromino
 
+MOVE_DOWN_END: 
     lw $ra, 0($sp) # restore $ra from stack
     addi $sp, $sp, 4 # $sp = $sp - 1
 
-MOVE_DOWN_END: 
     jr $ra # return
 
     # Store the current tetromino in the tetromino grid.
