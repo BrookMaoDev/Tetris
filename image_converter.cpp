@@ -22,7 +22,7 @@ const char hex_digits[] = {
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
 };
 
-std::string convert_to_hex(int val, int padding) {
+std::string convert_to_hex(unsigned int val, int padding) {
   std::string result = "";
 
   while (val > 0) {
@@ -68,7 +68,7 @@ int main () {
 
     // Amount to shift the current pixel. 
     int bit_shift = 0;
-    int word = 0;
+    unsigned int word = 0;
     // Print width/height of image.
     std::cout << "Image: " << file_path << "\n";
     std::cout << "character: .word 0x";
@@ -81,20 +81,18 @@ int main () {
     for (int r = 0; r < image.rows(); r++) {
       for (int c = 0; c < image.columns(); c++) {
         Magick::PixelPacket px = *pixels;
-        pixels ++;
 
-        if (px.blue != 0 && px.green != 0 && px.red != 0) {
-        std::cout << px.blue << " " << px.green << " " << px.red << "\n";
-
-        }
         word += (px.blue != 0 || px.green != 0 || px.red != 0) << bit_shift;
         bit_shift ++;
+        // std::cout << px.red << " " << px.green << " " << px.blue << " " << (px.blue != 0 || px.green != 0 || px.red != 0) << " " << word <<"\n";
 
         if (bit_shift >= 32) {
           std::cout << convert_to_hex(word, 8) << ", 0x";
           bit_shift = 0;
           word = 0;
         }
+
+        pixels ++;
       }
     }
 
