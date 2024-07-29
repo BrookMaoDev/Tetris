@@ -90,32 +90,12 @@ ADDR_KBRD:
     # Colour constants.
                     .eqv DARK_GREY, 0x7e7e7e
                     .eqv LIGHT_GREY, 0xbcbcbc
-                    .eqv TETROMINO_COLOUR, 0x05ffa3
 
     # The time to sleep between frames in milliseconds.
                     .eqv SLEEP_TIME_IN_MS, 300
 
                     .eqv MMIO_KEY_PRESSED_STATUS, 0xffff0000
                     .eqv MMIO_KEY_PRESSED_VALUE, 0xffff0004
-
-    ##############################################################################
-    # Mutable Data
-    ##############################################################################
-
-    # Data for the current tetromino(ct) being moved by the player
-ct_x: .word 6
-ct_y: .word 0
-ct_colour: .word 0x05ffa3
-    # up to a 4x4 grid. Each block is 1 byte.
-    # currently the L piece (todo: change this later)
-    # this is rows listed in order
-    # 0 means the block is empty, 1 means it's filled
-ct_grid: .byte 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0
-ct_auxiliary_grid: .space 16
-ct_grid_size: .word 3
-    # Grid of all tetromino blocks which have been placed.
-tetromino_grid: .byte 0:378
-tetromino_grid_len: .word 378
 
 SYMBOL_ZERO: .word 0x00050003, 0x00007b6f
 SYMBOL_ONE: .word 0x00050003, 0x00007493
@@ -134,6 +114,69 @@ SYMBOL_PTR_ARRAY: .word 0:10
 LOGO_SHADOW: .word 0x00100010, 0x00800000, 0x02a002a0, 0x00c00000, 0x03c000c0, 0x000003c0, 0x7bde0000, 0x1bd87bde, 0x00001bd8, 0x00000000
 BACKGROUND_IMAGE: .word 0x00800040, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xffff1fff, 0xfffff013, 0xffff1fff, 0xfffff839, 0xfffe1fff, 0xfffff838, 0xfffe0fff, 0xfffffc38, 0x7ffe07f8, 0xfffffe3c, 0x3ffc0000, 0xfffffe0c, 0x1ffc0000, 0xffffff04, 0x07f80003, 0xffffff00, 0x03f80007, 0xffffff00, 0x70f00003, 0x3fffff80, 0xf8000001, 0x1fffff80, 0xf8000000, 0x07ffff81, 0xfc007fc0, 0x03ffff83, 0xfc00fff8, 0x80ffffc3, 0xfc00fffc, 0xc03fffc3, 0xfe60fffc, 0x8c0fff81, 0x0078fff8, 0x1f81ff80, 0x007cffe0, 0x3fc07f00, 0x007c3fc3, 0x7ff0000c, 0x007e000f, 0x7ff8003e, 0x007f001f, 0xfffc007e, 0x003f003f, 0xffe000fe, 0x0c3f801f, 0x000000fe, 0x1e1f8000, 0x0000007c, 0x1f0f0000, 0x0000001c, 0x1f8001ff, 0x00000000, 0x1f801fff, 0x07e0fc00, 0x1fc07fff, 0x3ff1ff80, 0x1fe07fff, 0xfff3ffe0, 0x1fe0ffff, 0xfff3fff8, 0x1ff0ffff, 0xfff3fffc, 0x0ff1ffff, 0xffe3fffe, 0x0ff1ffff, 0xffc3ffff, 0x87f3ffff, 0x1e03ffff, 0xc3e3ffff, 0x0003ffff, 0xe003ffff, 0x0003ffff, 0xe007ffff, 0xc003ffff, 0xf007ffff, 0xf003ffff, 0xf007ffff, 0xf823ffff, 0xf00fffff, 0xfcf3ffff, 0xe00fffff, 0xf8f3ffff, 0xe00fffff, 0xe1f3ffff, 0xc00fffff, 0x01e3ffff, 0x800fffff, 0x01e3ffff, 0x800ffffe, 0x01c1ffff, 0x000ffff8, 0x0181ffff, 0x3c0fffe0, 0xc001fffc, 0x7f07ff07, 0xe001fff8, 0x7f83f81f, 0xe000fff0, 0x7fc0003f, 0xe000ffc0, 0x7f80007f, 0xe000ff80, 0x7f00007f, 0xe0007e00, 0x7c1f803f, 0xc1c07800, 0x701ff81f, 0x87e00000, 0x001fff07, 0x1ff00000, 0x001fff81, 0x3ff80000, 0x000fffc0, 0x7ffc03fe, 0x0007ffc0, 0xfffc0fff, 0x0003ffc0, 0x7ffc3fff, 0x0001ff80, 0x00003fff, 0x0000ff00, 0x00007fff, 0x07f81c00, 0xfe007fff, 0x0ffe0001, 0xffe03ffe, 0x0fff8001, 0xfffc3ffe, 0x07ffc3e1, 0xfffe3ffc, 0x07ffe3f3, 0xffff1ffc, 0x03fff3f3, 0xffff0ff8, 0x01fff1f3, 0xfffe0ff8, 0x00fff9e3, 0xfff807f0, 0x307ff8e3, 0xfff003f0, 0x383ff843, 0xffe001e0, 0x3e1ff800, 0xff8001c0, 0x3f0ff000, 0xff060000, 0x3f87f080, 0xfc0f000c, 0x3fc1c3e0, 0xf01f801e, 0x3fe007f8, 0xe01fc03e, 0x1fe00ff8, 0x801fe03f, 0x1ff01ffc, 0x003ff07f, 0x0fe03ffe, 0x003ff07f, 0x87e07fff, 0x7c3ff87f, 0x8000ffff, 0xfe3ff83f, 0x8000ffff, 0xfe3ffc1f, 0x8001ffff, 0xfe3ff80f, 0xc003ffff, 0xfe1fe007, 0xc003ffff, 0xfc000003, 0xc007ffff, 0xf80007e0, 0x000fffff, 0xf01e03e0, 0x000fffff, 0xc0ffc3e0, 0x001fffff, 0x83ffe1e0, 0xe01fffff, 0x03fff1c0, 0xf83fffff, 0x01fff08f, 0xfc3fffff, 0xf0fff01f, 0xfc7fffff, 0xfc3ff03f, 0xfc7fffff, 0xfe07e03f, 0xfc7fffff, 0xff00001f, 0xfc7fffff, 0xff00001f, 0xfc7fffff, 0xfe00000f, 0xf87fffff, 0xf8000007, 0xf807fffe, 0xe0383803, 0xf0003ff0, 0x00f83f01, 0xf0000000, 0x03f83fe0, 0x20000000, 0x07f81ff0, 0x00000000, 0x1ffc1ff8, 0x00000000, 0x3ffc0ff8, 0x00000000, 0x3ffc07f8, 0x0003ff00, 0x3ffc01f0, 0x0007ffe0, 0x3ffc0003, 0xf003fff0, 0x1ff8000f, 0xfc03fff0, 0x07f80c1f, 0xff03fff0, 0x00f00c1f, 0xff81ffe0, 0x00001c3f, 0x00000000, 0x00000000, 0x00000000
 
+L_TETROMINO: .byte 
+    0, 1, 0,
+    0, 1, 0,
+    0, 1, 1, 0, 0, 0, 0, 0, 0, 0
+J_TETROMINO: .byte 
+    0, 1, 0, 
+    0, 1, 0,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0
+I_TETROMINO: .byte 
+    0, 1, 0, 0,
+    0, 1, 0, 0,
+    0, 1, 0, 0,
+    0, 1, 0, 0
+O_TETROMINO: .byte 
+    1, 1,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+S_TETROMINO: .byte 
+    0, 1, 1,
+    1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+T_TETROMINO: .byte 
+    1, 1, 1,
+    0, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+Z_TETROMINO: .byte 
+    1, 1, 0,
+    0, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+STAR_TETROMINO: .byte 
+    1, 0, 0, 1,
+    0, 1, 1, 0,
+    0, 1, 1, 0,
+    1, 0, 0, 1
+
+    .eqv TETROMINO_COUNT, 8
+TETROMINO_PTR_ARRAY: .word 0:8 # to be initialized at run time.
+TETROMINO_SIZE_ARRAY: .byte 3, 3, 4, 2, 3, 3, 3, 4
+TETROMINO_COLOUR_ARRAY: .word 0x9ee4ff, 0x0008ff, 0xff8400, 0x82ffc1, 0xba82ff, 0xff0000, 0xff00a6, 0xd9ff00
+
+    ##############################################################################
+    # Mutable Data
+    ##############################################################################
+
+    # Data for the current tetromino(ct) being moved by the player
+
+# these values are set at runtime.
+ct_x: .word 0
+ct_y: .word 0
+ct_colour: .word 0
+ct_colour_index: .word 0 # index of the colour in the array PLUS 1
+    # up to a 4x4 grid. Each block is 1 byte.
+    # currently the L piece (todo: change this later)
+    # this is rows listed in order
+    # 0 means the block is empty, 1 means it's filled
+ct_grid: .byte 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0
+ct_auxiliary_grid: .space 16
+ct_grid_size: .word 3
+    # Grid of all tetromino blocks which have been placed.
+tetromino_grid: .byte 0:378
+tetromino_grid_len: .word 378
+score: .word 0 
+high_score: .word 0
+
     ##############################################################################
     # Code
     ##############################################################################
@@ -144,6 +187,8 @@ BACKGROUND_IMAGE: .word 0x00800040, 0x00000000, 0x00000000, 0x00000000, 0x000000
 main: 
     # Initialize the game
     jal initialize_numeric_symbols # load ptr into number array
+    jal initialize_tetromino_ptr_array # load tetromino ptr values into lookup array.
+    jal spawn_new_tetromino # create the first tetromino onto memory.  
 
     # draw the background
     li $a0, 0
@@ -282,7 +327,14 @@ DRAW_DARK_GREY_SQUARE:
     j DRAW_SQUARE # jump to DRAW_SQUARE
 
 DRAW_TETROMINO_COLOR_SQUARE:
-    li $t1, TETROMINO_COLOUR # $t1 = TETROMINO_COLOUR
+    # t4 = colour address of current tetromino = (t4 - 1) * 4 + colour_array_ptr 
+    addi $t4, $t4, -1 # -1 since the grid indices are offset by 1.
+    sll $t4, $t4, 2
+    la $t1, TETROMINO_COLOUR_ARRAY
+    add $t4, $t4, $t1
+
+    # load the colour value into t1
+    lw $t1, 0($t4)
     j DRAW_SQUARE # jump to DRAW_SQUARE
 
 DRAW_SQUARE: 
@@ -309,7 +361,7 @@ DRAW_TETROMINOS:
     # Draw the current tetromino (ct).
 
     # set the colour argument to tetromino colour
-    li $t1, TETROMINO_COLOUR
+    lw $t1, ct_colour
     # s0 = length and width of the tetromino grid
     lw $s0, ct_grid_size
     # s1 = array representing tetromino piece
@@ -730,6 +782,8 @@ LOOP_THROUGH_CURRENT_TETROMINO_ROW:
     beq $t7, $zero, AFTER_SAVED_BLOCK # if $t7 == $zero then goto AFTER_SAVED_BLOCK
 
 SAVE_BLOCK: 
+    # save the colour index to the grid.
+    lw $t7, ct_colour_index
     sb $t7, 0($t5) # $t5 = tetromino_grid[t5]
 
 AFTER_SAVED_BLOCK: 
@@ -749,13 +803,87 @@ END_LOOP_THROUGH_CURRENT_TETROMINO_ROWS:
     jr $ra # return
 
 spawn_new_tetromino:
+    # generate the random number
+    li $v0, 42
+    li $a0, 0
+    li $a1, TETROMINO_COUNT
+    syscall
+
+    # save the offset index into colour index
+    # colour_index = (a0 + 1) since 0 denotes no tetromino.
+    addi $t0, $a0, 1
+    sw $t0, ct_colour_index
+
+    # set the current tetromino size before we *4 to v0 for the offset on word arrays.
+    la $t0, TETROMINO_SIZE_ARRAY
+    add $t0, $t0, $a0
+    lb $t3, 0($t0) # t3 = ct_size 
+    sw $t3, ct_grid_size
+
+    sll $a0, $a0, 2 # so v0 is the byte offset of the tetromino arr
+
+    # load in our new tetromino
+    la $t0, TETROMINO_PTR_ARRAY
+    add $t0, $t0, $a0 # increment to our tetromino position
+    lw $t0, 0($t0) # this is the address of the tetromino grid.
+
+    la $t1, ct_grid # destination
+
+    # unrolled loop for copying
+    # the byte grid's len is a multiple of 4, so we can copy words at a time.
+    # load tetrmonio word, then place into ct_grid. Loop for 4 iterations.
+    lw $t2, 0($t0)
+    sw $t2, 0($t1)
+    lw $t2, 4($t0)
+    sw $t2, 4($t1)
+    lw $t2, 8($t0)
+    sw $t2, 8($t1)
+    lw $t2, 12($t0)
+    sw $t2, 12($t1)
+
+    # load in the new colour.
+    la $t0, TETROMINO_COLOUR_ARRAY
+    add $t0, $t0, $a0 # increment to our colour
+    # copy to ct_colour
+    lw $t1, 0($t0)
+    sw $t1, ct_colour
+
+    # compute the center of the grid, and put it in t2 (for use updating the positions)
+    # t2 = (width - ct_size)/2
+    li $t2, PLAYING_AREA_WIDTH_IN_BLOCKS
+    sub $t2, $t2, $t3 # t2 = width - ct_size
+    sra $t2, $t2, 1 # div 2
+    
+    # update the positions.
     la $t0, ct_x # $t0 = &ct_x
     la $t1, ct_y # $t1 = &ct_y
-    li $t2, 6 # $t2 = 6
     li $t3, 0 # $t3 = 0
     sw $t2, 0($t0) # $t2 = ct_x
     sw $t3, 0($t1) # $t3 = ct_y
     jr $ra # jump to $ra
+
+# Fills the TETROMINO_PTR_ARRAY with pointers to the tetromino grids.
+initialize_tetromino_ptr_array:
+    la $t0, TETROMINO_PTR_ARRAY
+
+    # load the address into t1, then put it into the array at the right offset.
+    la $t1, L_TETROMINO
+    sw $t1, 0($t0)
+    la $t1, J_TETROMINO
+    sw $t1, 4($t0)
+    la $t1, I_TETROMINO
+    sw $t1, 8($t0)
+    la $t1, O_TETROMINO
+    sw $t1, 12($t0)
+    la $t1, S_TETROMINO
+    sw $t1, 16($t0)
+    la $t1, T_TETROMINO
+    sw $t1, 20($t0)
+    la $t1, Z_TETROMINO
+    sw $t1, 24($t0)
+    la $t1, STAR_TETROMINO
+    sw $t1, 28($t0)
+
 
 # Fills the the SYMBOL_PTR_ARRAY with the symbol pointers. Make sure to call this on initilization.
 # Arguments:
@@ -785,6 +913,7 @@ initialize_numeric_symbols:
     sw $t1, 32($t0)
     la $t1, SYMBOL_NINE
     sw $t1, 36($t0)
+
 
 # Displays a number on screen with the top right being the start x and start y.
 # 
