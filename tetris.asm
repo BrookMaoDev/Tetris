@@ -75,6 +75,7 @@ ADDR_KBRD:
 
     # Constants of the screen, for image drawing
                     .eqv SCREEN_WIDTH_IN_UNITS 64
+                    .eqv SCREEN_AREA_IN_UNITS 8192
 
     # Constants defining the top-left corner of the playing area.
                     .eqv PLAYING_AREA_START_X_IN_UNITS, 4
@@ -173,6 +174,9 @@ tetromino_grid: .byte 0:378
 tetromino_grid_len: .word 378
 score: .word 0 
 high_score: .word 0
+
+# buffer to copy the frame into (screen size). This is to prevent flickering.
+frame_buffer: .word 0:SCREEN_AREA_IN_UNITS
 
     ##############################################################################
     # Code
@@ -292,8 +296,7 @@ DRAW_SCREEN:
     li $a1, PLAYING_AREA_START_Y_IN_UNITS # $a1 = PLAYING_AREA_START_Y_IN_UNITS
     li $a2, GRID_WIDTH_IN_UNITS # $a2 = GRID_WIDTH_IN_UNITS
     li $a3, GRID_HEIGHT_IN_UNITS # $a3 = GRID_HEIGHT_IN_UNITS
-    la $t0, ADDR_DSPL # $t0 = ADDR_DSPL
-    lw $t0, 0($t0) # $t0 = *ADDR_DSPL
+    la $t0, frame_buffer # $t0 = ADDR_DSPL
     li $t1, LIGHT_GREY # $t1 = LIGHT_GREY
 
     # Calculate the rightmost x coordinate of the playing area
@@ -448,7 +451,7 @@ SCORE_LENGTH_COUNTER_LOOP:
     # fill the rect to overwrite the previous score.
     # call it with arguments: 
     move $a2, $t1 # width
-    lw $t0, ADDR_DSPL # ptr to screen
+    la $t0, frame_buffer # ptr to screen
     li $t1, 0x0 # black 
     li $a0, 39 # start x
     li $a1, 1 # start y
@@ -466,6 +469,28 @@ SCORE_LENGTH_COUNTER_LOOP:
     # Apply gravity
     jal move_down # move the current tetromino down
     jal clear_lines # clear any lines that are full
+
+    # copy the frame buffer on screen
+    lw $t0, ADDR_DSPL # t0 = display address.
+    la $t1, frame_buffer # t1 = frame buffer address
+
+    # t2 = pixel count
+    li $t2, SCREEN_AREA_IN_UNITS
+
+FRAME_DRAW_LOOP:
+    # copy word from buffer to display
+    lw $t3, 0($t1)
+    sw $t3, 0($t0)
+
+    # inc pointers
+    addi $t0, $t0, 4
+    addi $t1, $t1, 4
+    # decrement loop iterator
+    addi $t2, $t2, -1
+
+    # loop while there are pixels remaining
+    bgtz $t2, FRAME_DRAW_LOOP
+
 
     # 4. Sleep
     li $v0, 32 # $v0 = 32
@@ -1050,7 +1075,7 @@ draw_shadow:
     mul $t5, $a1, $t7 # sp = start_y * screen_width
     add $t5, $t5, $a0 # + start_x
     sll $t5, $t5, 2 # sp = 4(start_y * screen_width) + start_x
-    lw $t8, ADDR_DSPL
+    la $t8, frame_buffer
     add $t5, $t5, $t8 # + screen address
 
     # t7 = 4(screen width - image width) 
