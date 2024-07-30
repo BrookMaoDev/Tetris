@@ -75,6 +75,7 @@ ADDR_KBRD:
 
     # Constants of the screen, for image drawing
                     .eqv SCREEN_WIDTH_IN_UNITS 64
+                    .eqv SCREEN_AREA_IN_UNITS 8192
 
     # Constants defining the top-left corner of the playing area.
                     .eqv PLAYING_AREA_START_X_IN_UNITS, 4
@@ -174,6 +175,9 @@ tetromino_grid_len: .word 378
 score: .word 0 
 high_score: .word 0
 
+# buffer to copy the frame into (screen size). This is to prevent flickering.
+frame_buffer: .word 0:SCREEN_AREA_IN_UNITS
+
     ##############################################################################
     # Code
     ##############################################################################
@@ -229,8 +233,25 @@ game_loop:
     beq $t0, 0x73, S_PRESSED # if $t0 == 's' then goto S_PRESSED
 
 W_PRESSED: 
-    jal rotate_ct_cw # rotate the current tetromino clockwise
-    j NO_KEY_PRESSED # jump to NO_KEY_PRESSED
+    # rotate the current tetromino clockwise
+    jal rotate_ct_cw
+    # Attempt to bound it if being rotated up against a wall.
+    jal bound_ct_horizontally
+    # Check if it's colliding anything after being bounded, If so, this move needs to be cancelled. 
+    jal ct_is_colliding # v0 = 1 means colliding
+
+    bne $v0, 1, MOVE_IS_LEGAL # no collision (see comment below)
+    
+    # undo this move.
+    # undo movement
+    sw $s0, ct_x
+    sw $s1, ct_y
+    # undo rotation
+    jal rotate_ct_cw
+    jal rotate_ct_cw
+    jal rotate_ct_cw
+
+    j MOVE_IS_LEGAL # skip the no key pressed since we don't need to preform collision check again.
 
 A_PRESSED: 
     jal move_left # move the current tetromino left
@@ -275,8 +296,7 @@ DRAW_SCREEN:
     li $a1, PLAYING_AREA_START_Y_IN_UNITS # $a1 = PLAYING_AREA_START_Y_IN_UNITS
     li $a2, GRID_WIDTH_IN_UNITS # $a2 = GRID_WIDTH_IN_UNITS
     li $a3, GRID_HEIGHT_IN_UNITS # $a3 = GRID_HEIGHT_IN_UNITS
-    la $t0, ADDR_DSPL # $t0 = ADDR_DSPL
-    lw $t0, 0($t0) # $t0 = *ADDR_DSPL
+    la $t0, frame_buffer # $t0 = ADDR_DSPL
     li $t1, LIGHT_GREY # $t1 = LIGHT_GREY
 
     # Calculate the rightmost x coordinate of the playing area
@@ -431,7 +451,7 @@ SCORE_LENGTH_COUNTER_LOOP:
     # fill the rect to overwrite the previous score.
     # call it with arguments: 
     move $a2, $t1 # width
-    lw $t0, ADDR_DSPL # ptr to screen
+    la $t0, frame_buffer # ptr to screen
     li $t1, 0x0 # black 
     li $a0, 39 # start x
     li $a1, 1 # start y
@@ -449,6 +469,28 @@ SCORE_LENGTH_COUNTER_LOOP:
     # Apply gravity
     jal move_down # move the current tetromino down
     jal clear_lines # clear any lines that are full
+
+    # copy the frame buffer on screen
+    lw $t0, ADDR_DSPL # t0 = display address.
+    la $t1, frame_buffer # t1 = frame buffer address
+
+    # t2 = pixel count
+    li $t2, SCREEN_AREA_IN_UNITS
+
+FRAME_DRAW_LOOP:
+    # copy word from buffer to display
+    lw $t3, 0($t1)
+    sw $t3, 0($t0)
+
+    # inc pointers
+    addi $t0, $t0, 4
+    addi $t1, $t1, 4
+    # decrement loop iterator
+    addi $t2, $t2, -1
+
+    # loop while there are pixels remaining
+    bgtz $t2, FRAME_DRAW_LOOP
+
 
     # 4. Sleep
     li $v0, 32 # $v0 = 32
@@ -475,56 +517,56 @@ SCORE_LENGTH_COUNTER_LOOP:
     #       
     # Arguments:
     # ra = return address
-    # uses registers s0 to s6, t7
+    # uses registers t0 to t6, t7
 rotate_ct_cw: 
-    # s0 = matrix length (n)
-    lw $s0, ct_grid_size
-    # s1 = starting location for pointer of B, initially
-    add $s1, $s0, -1
-    # s2 = n^2
-    mul $s2, $s0, $s0
-    # s3 = pointer for A
-    li $s3, 0
-    # s4 = pointer for B
-    move $s4, $s1
-    # s5 = offset A
-    la $s5, ct_grid
-    # s6 = offset B
-    la $s6, ct_auxiliary_grid
+    # t0 = matrix length (n)
+    lw $t0, ct_grid_size
+    # t1 = starting location for pointer of B, initially
+    add $t1, $t0, -1
+    # t2 = n^2
+    mul $t2, $t0, $t0
+    # t3 = pointer for A
+    li $t3, 0
+    # t4 = pointer for B
+    move $t4, $t1
+    # t5 = offset A
+    la $t5, ct_grid
+    # t6 = offset B
+    la $t6, ct_auxiliary_grid
 ROTATE_CW_LOOP: 
     # get A's address
-    add $t8, $s3, $s5
+    add $t8, $t3, $t5
     # load the value from A
     lb $t7, 0($t8)
 
     # get B's address
-    add $t8, $s4, $s6
+    add $t8, $t4, $t6
     # copy the value into B
     sb $t7, 0($t8)
 
     # increment pointers
-    addi $s3, $s3, 1
-    add $s4, $s4, $s0 # ptrB += n
+    addi $t3, $t3, 1
+    add $t4, $t4, $t0 # ptrB += n
 
     # if ptrB < n^2, skip
-    blt $s4, $s2, ROTATE_NO_OVERFLOW
-    # s1 -- and set ptr B back in bounds
-    addi $s1, $s1, -1
-    move $s4, $s1
+    blt $t4, $t2, ROTATE_NO_OVERFLOW
+    # t1 -- and set ptr B back in bounds
+    addi $t1, $t1, -1
+    move $t4, $t1
 ROTATE_NO_OVERFLOW: 
-    blt $s3, $s2, ROTATE_CW_LOOP # while ptr A < n^2
+    blt $t3, $t2, ROTATE_CW_LOOP # while ptr A < n^2
 
     # copy data back
-    li $s1, 0
+    li $t1, 0
 AUXILIARY_COPY_BACK_LOOP:
     # get value from B
-    add $t8, $s1, $s6
+    add $t8, $t1, $t6
     lb $t7, 0($t8)
     # copy the value into A
-    add $t8, $s1, $s5
+    add $t8, $t1, $t5
     sb $t7, 0($t8)
-    addi $s1, $s1, 1
-    blt $s1, $s2, AUXILIARY_COPY_BACK_LOOP
+    addi $t1, $t1, 1
+    blt $t1, $t2, AUXILIARY_COPY_BACK_LOOP
 
     jr $ra # return
 
@@ -1033,7 +1075,7 @@ draw_shadow:
     mul $t5, $a1, $t7 # sp = start_y * screen_width
     add $t5, $t5, $a0 # + start_x
     sll $t5, $t5, 2 # sp = 4(start_y * screen_width) + start_x
-    lw $t8, ADDR_DSPL
+    la $t8, frame_buffer
     add $t5, $t5, $t8 # + screen address
 
     # t7 = 4(screen width - image width) 
