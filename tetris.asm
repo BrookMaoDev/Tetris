@@ -17,20 +17,18 @@
     # Which approved features have been implemented?
     # (See the assignment handout for the list of features)
     # Easy Features:
-    # 1. (fill in the feature, if any)
-    # 2. (fill in the feature, if any)
-    # ... (add more if necessary)
+    # 1. Gravity
+    # 2. Each tetromino type has a unique colour
     # Hard Features:
-    # 1. (fill in the feature, if any)
-    # 2. (fill in the feature, if any)
-    # ... (add more if necessary)
+    # 1. Tracks and displays the score
+    # 2. Full set of tetrominoes
     # How to play:
     # (Include any instructions)
     # Link to video demonstration for final submission:
     # - (insert YouTube / MyMedia / other URL here). Make sure we can view it!
     #       
     # Are you OK with us sharing the video with people outside course staff?
-    # - yes / no
+    # - yes
     #       
     # Any additional information that the TA needs to know:
     # - (write here, if any)
@@ -353,7 +351,7 @@ MOVE_IS_LEGAL:
     # 2b. Update locations (paddle, ball)
     # 3. Draw the screen
 
-DRAW_SCREEN: 
+DRAW_SCREEN:
     # Draw the checkered pattern
     li $a0, PLAYING_AREA_START_X_IN_UNITS # $a0 = PLAYING_AREA_START_X_IN_UNITS
     li $a1, PLAYING_AREA_START_Y_IN_UNITS # $a1 = PLAYING_AREA_START_Y_IN_UNITS
