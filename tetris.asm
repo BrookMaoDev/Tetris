@@ -116,6 +116,9 @@ LOGO_SHADOW: .word 0x00100010, 0x00800000, 0x02a002a0, 0x00c00000, 0x03c000c0, 0
 BACKGROUND_IMAGE: .word 0x00800040, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xffff1fff, 0xfffff013, 0xffff1fff, 0xfffff839, 0xfffe1fff, 0xfffff838, 0xfffe0fff, 0xfffffc38, 0x7ffe07f8, 0xfffffe3c, 0x3ffc0000, 0xfffffe0c, 0x1ffc0000, 0xffffff04, 0x07f80003, 0xffffff00, 0x03f80007, 0xffffff00, 0x70f00003, 0x3fffff80, 0xf8000001, 0x1fffff80, 0xf8000000, 0x07ffff81, 0xfc007fc0, 0x03ffff83, 0xfc00fff8, 0x80ffffc3, 0xfc00fffc, 0xc03fffc3, 0xfe60fffc, 0x8c0fff81, 0x0078fff8, 0x1f81ff80, 0x007cffe0, 0x3fc07f00, 0x007c3fc3, 0x7ff0000c, 0x007e000f, 0x7ff8003e, 0x007f001f, 0xfffc007e, 0x003f003f, 0xffe000fe, 0x0c3f801f, 0x000000fe, 0x1e1f8000, 0x0000007c, 0x1f0f0000, 0x0000001c, 0x1f8001ff, 0x00000000, 0x1f801fff, 0x07e0fc00, 0x1fc07fff, 0x3ff1ff80, 0x1fe07fff, 0xfff3ffe0, 0x1fe0ffff, 0xfff3fff8, 0x1ff0ffff, 0xfff3fffc, 0x0ff1ffff, 0xffe3fffe, 0x0ff1ffff, 0xffc3ffff, 0x87f3ffff, 0x1e03ffff, 0xc3e3ffff, 0x0003ffff, 0xe003ffff, 0x0003ffff, 0xe007ffff, 0xc003ffff, 0xf007ffff, 0xf003ffff, 0xf007ffff, 0xf823ffff, 0xf00fffff, 0xfcf3ffff, 0xe00fffff, 0xf8f3ffff, 0xe00fffff, 0xe1f3ffff, 0xc00fffff, 0x01e3ffff, 0x800fffff, 0x01e3ffff, 0x800ffffe, 0x01c1ffff, 0x000ffff8, 0x0181ffff, 0x3c0fffe0, 0xc001fffc, 0x7f07ff07, 0xe001fff8, 0x7f83f81f, 0xe000fff0, 0x7fc0003f, 0xe000ffc0, 0x7f80007f, 0xe000ff80, 0x7f00007f, 0xe0007e00, 0x7c1f803f, 0xc1c07800, 0x701ff81f, 0x87e00000, 0x001fff07, 0x1ff00000, 0x001fff81, 0x3ff80000, 0x000fffc0, 0x7ffc03fe, 0x0007ffc0, 0xfffc0fff, 0x0003ffc0, 0x7ffc3fff, 0x0001ff80, 0x00003fff, 0x0000ff00, 0x00007fff, 0x07f81c00, 0xfe007fff, 0x0ffe0001, 0xffe03ffe, 0x0fff8001, 0xfffc3ffe, 0x07ffc3e1, 0xfffe3ffc, 0x07ffe3f3, 0xffff1ffc, 0x03fff3f3, 0xffff0ff8, 0x01fff1f3, 0xfffe0ff8, 0x00fff9e3, 0xfff807f0, 0x307ff8e3, 0xfff003f0, 0x383ff843, 0xffe001e0, 0x3e1ff800, 0xff8001c0, 0x3f0ff000, 0xff060000, 0x3f87f080, 0xfc0f000c, 0x3fc1c3e0, 0xf01f801e, 0x3fe007f8, 0xe01fc03e, 0x1fe00ff8, 0x801fe03f, 0x1ff01ffc, 0x003ff07f, 0x0fe03ffe, 0x003ff07f, 0x87e07fff, 0x7c3ff87f, 0x8000ffff, 0xfe3ff83f, 0x8000ffff, 0xfe3ffc1f, 0x8001ffff, 0xfe3ff80f, 0xc003ffff, 0xfe1fe007, 0xc003ffff, 0xfc000003, 0xc007ffff, 0xf80007e0, 0x000fffff, 0xf01e03e0, 0x000fffff, 0xc0ffc3e0, 0x001fffff, 0x83ffe1e0, 0xe01fffff, 0x03fff1c0, 0xf83fffff, 0x01fff08f, 0xfc3fffff, 0xf0fff01f, 0xfc7fffff, 0xfc3ff03f, 0xfc7fffff, 0xfe07e03f, 0xfc7fffff, 0xff00001f, 0xfc7fffff, 0xff00001f, 0xfc7fffff, 0xfe00000f, 0xf87fffff, 0xf8000007, 0xf807fffe, 0xe0383803, 0xf0003ff0, 0x00f83f01, 0xf0000000, 0x03f83fe0, 0x20000000, 0x07f81ff0, 0x00000000, 0x1ffc1ff8, 0x00000000, 0x3ffc0ff8, 0x00000000, 0x3ffc07f8, 0x0003ff00, 0x3ffc01f0, 0x0007ffe0, 0x3ffc0003, 0xf003fff0, 0x1ff8000f, 0xfc03fff0, 0x07f80c1f, 0xff03fff0, 0x00f00c1f, 0xff81ffe0, 0x00001c3f, 0x00000000, 0x00000000, 0x00000000
 
 SCORE_TEXT: .word 0x00050015, 0xa2277777, 0x1dd45e2a, 0x77789a8a, 0x00000075
+PAUSE_TEXT: .word 0x000a0032, 0xf8c63e1f, 0x8c8cf9f8, 0x60663319, 0xcc663235, 0xc8e18180, 0x06033198, 0xc6632386, 0x7e19f878, 0x638319fc, 0x66303860, 0xe1819c0c, 0x603198c0, 0x63038606, 0x58198cfe, 0xe1f18c0d, 0x0003e7e3 
+PRESS_P_TO_TEXT: .word 0x0007002b, 0x38319de7, 0x52294b9c, 0x4a624242, 0x12120211, 0x70633bcf, 0x20461890, 0x50c48084, 0x24042522, 0x20c67486, 0x00000e20
+UNPAUSE_TEXT: .word 0x00070024, 0x645e7451, 0x45294d1e, 0x52955129, 0xe7551214, 0x1651e645, 0x65128452, 0x4e294521, 0x0e639214
 
 L_TETROMINO: .byte 
     0, 1, 0,
@@ -174,6 +177,8 @@ tetromino_grid: .byte 0:378
 tetromino_grid_len: .word 378
 score: .word 0 
 high_score: .word 0
+# 0 = running, 1 = paused, 2 = game over
+game_state: .word 0
 
 # buffer to copy the frame into (screen size). This is to prevent flickering.
 frame_buffer: .word 0:SCREEN_AREA_IN_UNITS
@@ -213,25 +218,83 @@ main:
     jal draw_shadow
 
 game_loop: 
+    # 1a. Check if key has been pressed
+    li $t0, MMIO_KEY_PRESSED_STATUS # $t0 = MMIO_KEY_PRESSED_STATUS
+    lw $t1, 0($t0) # $t1 = *MMIO_KEY_PRESSED_STATUS
+    # t1 stores 1 if a key has been pressed
+    # it will be checked later in the run state.
+    lw $t0, 4($t0) # $t0 = *MMIO_KEY_PRESSED_VALUE
+    # t0 stores the ascii value of the key pressed
+
+    # check if the game is in the paused state
+    # check if the game is in the game over state
+    lw $t2, game_state # t2 = game state
+    beq $t2, $0, RUN_STATE
+
+PAUSED_STATE:
+    bne $t1, 1, NO_KEY_PRESSED_PAUSED_STATE
+    # check if p is pressed, to unpause.
+    beq $t0, 0x70, P_PRESSED_PAUSED_STATE
+NO_KEY_PRESSED_PAUSED_STATE:
+
+    # otherwise, draw shadow with start x, start y, colour, image ptr
+    li $a0, 7
+    li $a1, 36
+    li $a2, 0x000000
+    la $a3, PAUSE_TEXT
+    jal draw_shadow
+
+    li $a0, 11
+    li $a1, 55
+    la $a3, PRESS_P_TO_TEXT
+    jal draw_shadow
+
+    li $a0, 14
+    li $a1, 65
+    la $a3, UNPAUSE_TEXT
+    jal draw_shadow
+
+    j FINALIZE_FRAME_AND_SLEEP # complete the frame and sleep. 
+P_PRESSED_PAUSED_STATE:
+    # unpause and go to the game. (set game_state to 0)
+    li $a0, 0
+    sw $a0, game_state
+
+    # set to no key pressed so we don't pause immediately
+    li $t1, 0
+
+    j RUN_STATE
+
+GAME_OVER_STATE:
+    # display the game over message.
+    j FINALIZE_FRAME_AND_SLEEP # complete the frame and sleep. 
+
+RUN_STATE:
+    # if no key pressed. 
+    bne $t1, 1, NO_KEY_PRESSED
 
     # save the current tetromino position in s0, s1 so it can be undone.
     lw $s0, ct_x
     lw $s1, ct_y
 
-    # 1a. Check if key has been pressed
-    li $t0, MMIO_KEY_PRESSED_STATUS # $t0 = MMIO_KEY_PRESSED_STATUS
-    lw $t1, 0($t0) # $t1 = *MMIO_KEY_PRESSED_STATUS
-    # t1 stores 1 if a key has been pressed
-    bne $t1, 1, NO_KEY_PRESSED # if $t1 != 1 then goto NO_KEY_PRESSED
-    lw $t0, 4($t0) # $t0 = *MMIO_KEY_PRESSED_VALUE
-    # t0 stores the ascii value of the key pressed
-
-    # 1b. Check which key has been pressed
+    beq $t0, 0x70, P_PRESSED_RUN_STATE # if $t0 == 'p' then pause the game
     beq $t0, 0x77, W_PRESSED # if $t0 == 'w' then goto W_PRESSED
     beq $t0, 0x61, A_PRESSED # if $t0 == 'a' then goto A_PRESSED
     beq $t0, 0x64, D_PRESSED # if $t0 == 'd' then goto D_PRESSED
     beq $t0, 0x73, S_PRESSED # if $t0 == 's' then goto S_PRESSED
+    j NO_KEY_PRESSED # if no relevant key pressed
 
+P_PRESSED_RUN_STATE:
+    # pause the game. 
+    # set the state(ie game_state = 0)
+    li $a0, 1
+    sw $a0, game_state
+
+    # set to no key pressed so we don't pause run immediately
+    li $t1, 0
+
+    # draw the paused text.
+    j PAUSED_STATE
 W_PRESSED: 
     # rotate the current tetromino clockwise
     jal rotate_ct_cw
@@ -470,6 +533,7 @@ SCORE_LENGTH_COUNTER_LOOP:
     jal move_down # move the current tetromino down
     jal clear_lines # clear any lines that are full
 
+FINALIZE_FRAME_AND_SLEEP:
     # copy the frame buffer on screen
     lw $t0, ADDR_DSPL # t0 = display address.
     la $t1, frame_buffer # t1 = frame buffer address
@@ -490,7 +554,6 @@ FRAME_DRAW_LOOP:
 
     # loop while there are pixels remaining
     bgtz $t2, FRAME_DRAW_LOOP
-
 
     # 4. Sleep
     li $v0, 32 # $v0 = 32
