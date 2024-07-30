@@ -1122,13 +1122,99 @@ CLEAR_ROW_LOOP:
     sb		$t3, 0($t4)		# $t4 = 0
 
     addi    $t1, $t1, 1			# $t1 = $t1 + 1
-    bge		$t1, $t2, END_LOOP_THROUGH_ROW_TO_CLEAR		# if $t1 >= $t2 then goto END_CLEAR_ROW_LOOP
+    bge		$t1, $t2, DONE_CLEARING_NOW_SHIFT_DOWN		# if $t1 >= $t2 then goto DONE_CLEARING_NOW_SHIFT_DOWN
     j		CLEAR_ROW_LOOP		# jump to CLEAR_ROW_LOOP
+
+DONE_CLEARING_NOW_SHIFT_DOWN:
+    # Load arguments for shift_all_rows_down
+    move	$a0, $t0		# $a0 = $t0
+
+    # Save the return address on the stack
+    addi	$sp, $sp, -4			# $sp = $sp -4
+    sw		$ra, 0($sp)		# $sp[0] = $ra
+
+    # Save the values inside the temporary registers
+    addi    $sp, $sp, -24			# $sp = $sp -24
+    sw		$t0, 0($sp)		# $sp[0] = $t0
+    sw      $t1, 4($sp)		# $sp[4] = $t1
+    sw      $t2, 8($sp)		# $sp[8] = $t2
+    sw      $t3, 12($sp)		# $sp[12] = $t3
+    sw      $t4, 16($sp)		# $sp[16] = $t4
+    sw      $t5, 20($sp)		# $sp[20] = $t5
+
+    jal        shift_all_rows_down		# jump to shift_all_rows_down
+
+    # Restore the values inside the temporary registers
+    lw		$t0, 0($sp)		# $t0 = $sp[0]
+    lw      $t1, 4($sp)		# $t1 = $sp[4]
+    lw      $t2, 8($sp)		# $t2 = $sp[8]
+    lw      $t3, 12($sp)		# $t3 = $sp[12]
+    lw      $t4, 16($sp)		# $t4 = $sp[16]
+    lw      $t5, 20($sp)		# $t5 = $sp[20]
+    addi    $sp, $sp, 24			# $sp = $sp + 24
+
+    # Restore the return address from the stack
+    lw		$ra, 0($sp)		# $ra = $sp[0]
+    addi	$sp, $sp, 4			# $sp = $sp + 4
 
 END_LOOP_THROUGH_ROW_TO_CLEAR:
     addi	$t0, $t0, 1			# $t0 = $t0 + 1
     bge		$t0, $t5, END_LOOP_THROUGH_ROWS_TO_CLEAR	# if $t0 >= $t5 then goto END_LOOP_THROUGH_ROWS_TO_CLEAR
+
     j       LOOP_THROUGH_ROWS_TO_CLEAR		# jump to LOOP_THROUGH_ROWS_TO_CLEAR
 
 END_LOOP_THROUGH_ROWS_TO_CLEAR:
+    jr		$ra		# return
+
+# Shifts all rows above $a0 down by one.
+# Arguments:
+# a0 = row that was just cleared and everything above it needs to be shifted down.
+# ra = return address
+# Uses registers t0 to t7 and modifies arguments
+shift_all_rows_down:
+    li		$t0, PLAYING_AREA_WIDTH_IN_BLOCKS		# $t0 = PLAYING_AREA_WIDTH_IN_BLOCKS
+    la		$t4, tetromino_grid		# $t4 = &tetromino_grid
+    
+LOOP_THROUGH_ROWS_TO_SHIFT:
+    # What column we are currently checking within the row
+    li		$t1, 0		# $t1 = 0
+
+    # Calculate the offset to get to the row that we are shifting "into"
+    mult	$a0, $t0			# $a0 * $t0 = Hi and Lo registers
+    mflo    $t2					# copy Lo to $t2
+
+    # Calculate the offset to get to the row that we are shifting "from"
+    addi	$a0, $a0, -1			# $a0 = $a0 + -1
+    mult	$a0, $t0			# $a0 * $t0 = Hi and Lo registers
+    mflo    $t3					# copy Lo to $t3
+    # Note that this decrements the register that keeps track of where we are shifting "into" so there is no need to decrement later.
+
+LOOP_THROUGH_ROW_TO_SHIFT:
+    add		$t5, $t2, $t1		# $t5 = $t2 + $t1
+    add		$t5, $t4, $t5		# $t5 = $t4 + $t5
+    # $t5 is the address of the block in tetromino grid that we want to shift "into"
+
+    add		$t6, $t3, $t1		# $t6 = $t3 + $t1
+    add		$t6, $t4, $t6		# $t6 = $t4 + $t6
+    # $t6 is the address of the block in tetromino grid that we want to shift "from"
+
+    # Shift the block from the row above into the row below
+    lb		$t7, 0($t6)		# $t7 = tetromino_grid[t6]
+    sb		$t7, 0($t5)		# tetromino_grid[t5] = $t7
+
+    # Clear the block in the row above
+    li		$t7, 0		# $t7 = 0
+    sb		$t7, 0($t6)		# tetromino_grid[t6] = $t7
+
+    # Move to the next column or break if we are done
+    addi    $t1, $t1, 1			# $t1 = $t1 + 1
+    bge		$t1, $t0, END_LOOP_THROUGH_ROW_TO_SHIFT		# if $t1 >= $t0 then goto END_LOOP_THROUGH_ROWS_TO_SHIFT
+    j		LOOP_THROUGH_ROW_TO_SHIFT		# jump to LOOP_THROUGH_ROW_TO_SHIFT
+
+END_LOOP_THROUGH_ROW_TO_SHIFT:
+    # Recall that there is no need to decrement $a0 since we decremented it earlier
+    beq    $a0, $zero, END_LOOP_THROUGH_ROWS_TO_SHIFT		# if $a0 == 0 then goto END_LOOP_THROUGH_ROWS_TO_SHIFT
+    j       LOOP_THROUGH_ROWS_TO_SHIFT		# jump to LOOP_THROUGH_ROWS_TO_SHIFT
+
+END_LOOP_THROUGH_ROWS_TO_SHIFT:
     jr		$ra		# return
