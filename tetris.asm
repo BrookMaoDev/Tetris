@@ -114,6 +114,8 @@ SYMBOL_PTR_ARRAY: .word 0:10
 LOGO_SHADOW: .word 0x00100010, 0x00800000, 0x02a002a0, 0x00c00000, 0x03c000c0, 0x000003c0, 0x7bde0000, 0x1bd87bde, 0x00001bd8, 0x00000000
 BACKGROUND_IMAGE: .word 0x00800040, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xffff1fff, 0xfffff013, 0xffff1fff, 0xfffff839, 0xfffe1fff, 0xfffff838, 0xfffe0fff, 0xfffffc38, 0x7ffe07f8, 0xfffffe3c, 0x3ffc0000, 0xfffffe0c, 0x1ffc0000, 0xffffff04, 0x07f80003, 0xffffff00, 0x03f80007, 0xffffff00, 0x70f00003, 0x3fffff80, 0xf8000001, 0x1fffff80, 0xf8000000, 0x07ffff81, 0xfc007fc0, 0x03ffff83, 0xfc00fff8, 0x80ffffc3, 0xfc00fffc, 0xc03fffc3, 0xfe60fffc, 0x8c0fff81, 0x0078fff8, 0x1f81ff80, 0x007cffe0, 0x3fc07f00, 0x007c3fc3, 0x7ff0000c, 0x007e000f, 0x7ff8003e, 0x007f001f, 0xfffc007e, 0x003f003f, 0xffe000fe, 0x0c3f801f, 0x000000fe, 0x1e1f8000, 0x0000007c, 0x1f0f0000, 0x0000001c, 0x1f8001ff, 0x00000000, 0x1f801fff, 0x07e0fc00, 0x1fc07fff, 0x3ff1ff80, 0x1fe07fff, 0xfff3ffe0, 0x1fe0ffff, 0xfff3fff8, 0x1ff0ffff, 0xfff3fffc, 0x0ff1ffff, 0xffe3fffe, 0x0ff1ffff, 0xffc3ffff, 0x87f3ffff, 0x1e03ffff, 0xc3e3ffff, 0x0003ffff, 0xe003ffff, 0x0003ffff, 0xe007ffff, 0xc003ffff, 0xf007ffff, 0xf003ffff, 0xf007ffff, 0xf823ffff, 0xf00fffff, 0xfcf3ffff, 0xe00fffff, 0xf8f3ffff, 0xe00fffff, 0xe1f3ffff, 0xc00fffff, 0x01e3ffff, 0x800fffff, 0x01e3ffff, 0x800ffffe, 0x01c1ffff, 0x000ffff8, 0x0181ffff, 0x3c0fffe0, 0xc001fffc, 0x7f07ff07, 0xe001fff8, 0x7f83f81f, 0xe000fff0, 0x7fc0003f, 0xe000ffc0, 0x7f80007f, 0xe000ff80, 0x7f00007f, 0xe0007e00, 0x7c1f803f, 0xc1c07800, 0x701ff81f, 0x87e00000, 0x001fff07, 0x1ff00000, 0x001fff81, 0x3ff80000, 0x000fffc0, 0x7ffc03fe, 0x0007ffc0, 0xfffc0fff, 0x0003ffc0, 0x7ffc3fff, 0x0001ff80, 0x00003fff, 0x0000ff00, 0x00007fff, 0x07f81c00, 0xfe007fff, 0x0ffe0001, 0xffe03ffe, 0x0fff8001, 0xfffc3ffe, 0x07ffc3e1, 0xfffe3ffc, 0x07ffe3f3, 0xffff1ffc, 0x03fff3f3, 0xffff0ff8, 0x01fff1f3, 0xfffe0ff8, 0x00fff9e3, 0xfff807f0, 0x307ff8e3, 0xfff003f0, 0x383ff843, 0xffe001e0, 0x3e1ff800, 0xff8001c0, 0x3f0ff000, 0xff060000, 0x3f87f080, 0xfc0f000c, 0x3fc1c3e0, 0xf01f801e, 0x3fe007f8, 0xe01fc03e, 0x1fe00ff8, 0x801fe03f, 0x1ff01ffc, 0x003ff07f, 0x0fe03ffe, 0x003ff07f, 0x87e07fff, 0x7c3ff87f, 0x8000ffff, 0xfe3ff83f, 0x8000ffff, 0xfe3ffc1f, 0x8001ffff, 0xfe3ff80f, 0xc003ffff, 0xfe1fe007, 0xc003ffff, 0xfc000003, 0xc007ffff, 0xf80007e0, 0x000fffff, 0xf01e03e0, 0x000fffff, 0xc0ffc3e0, 0x001fffff, 0x83ffe1e0, 0xe01fffff, 0x03fff1c0, 0xf83fffff, 0x01fff08f, 0xfc3fffff, 0xf0fff01f, 0xfc7fffff, 0xfc3ff03f, 0xfc7fffff, 0xfe07e03f, 0xfc7fffff, 0xff00001f, 0xfc7fffff, 0xff00001f, 0xfc7fffff, 0xfe00000f, 0xf87fffff, 0xf8000007, 0xf807fffe, 0xe0383803, 0xf0003ff0, 0x00f83f01, 0xf0000000, 0x03f83fe0, 0x20000000, 0x07f81ff0, 0x00000000, 0x1ffc1ff8, 0x00000000, 0x3ffc0ff8, 0x00000000, 0x3ffc07f8, 0x0003ff00, 0x3ffc01f0, 0x0007ffe0, 0x3ffc0003, 0xf003fff0, 0x1ff8000f, 0xfc03fff0, 0x07f80c1f, 0xff03fff0, 0x00f00c1f, 0xff81ffe0, 0x00001c3f, 0x00000000, 0x00000000, 0x00000000
 
+SCORE_TEXT: .word 0x00050015, 0xa2277777, 0x1dd45e2a, 0x77789a8a, 0x00000075
+
 L_TETROMINO: .byte 
     0, 1, 0,
     0, 1, 0,
@@ -142,16 +144,11 @@ Z_TETROMINO: .byte
     1, 1, 0,
     0, 1, 1,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-STAR_TETROMINO: .byte 
-    1, 0, 0, 1,
-    0, 1, 1, 0,
-    0, 1, 1, 0,
-    1, 0, 0, 1
 
-    .eqv TETROMINO_COUNT, 8
-TETROMINO_PTR_ARRAY: .word 0:8 # to be initialized at run time.
-TETROMINO_SIZE_ARRAY: .byte 3, 3, 4, 2, 3, 3, 3, 4
-TETROMINO_COLOUR_ARRAY: .word 0x9ee4ff, 0x0008ff, 0xff8400, 0x82ffc1, 0xba82ff, 0xff0000, 0xff00a6, 0xd9ff00
+    .eqv TETROMINO_COUNT, 7
+TETROMINO_PTR_ARRAY: .word 0:7 # to be initialized at run time.
+TETROMINO_SIZE_ARRAY: .byte 3, 3, 4, 2, 3, 3, 3
+TETROMINO_COLOUR_ARRAY: .word 0x9ee4ff, 0x0008ff, 0xd9ff00, 0x82ffc1, 0xba82ff, 0xff0000, 0xff00a6
 
     ##############################################################################
     # Mutable Data
@@ -204,6 +201,13 @@ main:
     la $a3, LOGO_SHADOW
     jal draw_shadow
 
+    # draw the score text
+    li $a0, 17
+    li $a1, 1
+    li $a2, 0xffffff
+    la $a3, SCORE_TEXT
+    jal draw_shadow
+
 game_loop: 
 
     # save the current tetromino position in s0, s1 so it can be undone.
@@ -237,7 +241,18 @@ D_PRESSED:
     j NO_KEY_PRESSED # jump to NO_KEY_PRESSED
 
 S_PRESSED: 
-    jal move_down # move the current tetromino down
+    # Make the tetromino move down 4 blocks. These 3 + gravity.
+    jal move_down
+    jal move_down
+    jal move_down
+
+    # v0 is set to 0 if it's not colliding from the collision check in move_down. If no collision, add 1 point to the score
+    bne $v0, $0, NO_EXTRA_MOVE_DOWN_POINT
+    lw $t0, score
+    addi $t0, $t0, 1
+    sw $t0, score
+NO_EXTRA_MOVE_DOWN_POINT:
+
     j NO_KEY_PRESSED # jump to NO_KEY_PRESSED
 
 NO_KEY_PRESSED: 
@@ -397,7 +412,38 @@ INNER_DRAW_CT_LOOP_FINAL:
     addi $s3, $s3, 1 # rows ++
     blt $s3, $s0, OUTER_DRAW_CT_LOOP # loop outer while rows < gt_len
 
-    # Todo: draw the rest of the placed tetrominos.
+    # Draw the score.
+    # First, find how long the score is.
+    lw $t0, score
+    li $t1, 0
+    li $t2, 10
+    # count how many times score can be divided by 10 to get the digit count
+SCORE_LENGTH_COUNTER_LOOP:
+    div $t0, $t2
+    mflo $t0
+    addi $t1, $t1, 1
+    bgtz $t0, SCORE_LENGTH_COUNTER_LOOP
+
+    # t1 *= 4 so t1 = length of score text, since every letter is 3x5 and there is a space in between.
+    sll $t1, $t1, 2
+
+    # start at (39, 1)
+    # fill the rect to overwrite the previous score.
+    # call it with arguments: 
+    move $a2, $t1 # width
+    lw $t0, ADDR_DSPL # ptr to screen
+    li $t1, 0x0 # black 
+    li $a0, 39 # start x
+    li $a1, 1 # start y
+    li $a3, 5 # height
+    jal fill_rect
+
+    # draw the score.
+    addi $a0, $a2, 39 # end x = width + 39
+    li $a1, 1 # start y
+    li $a2, 0xffffff # colour 
+    lw $a3, score # number to draw
+    jal draw_number
 
     # Physics
     # Apply gravity
@@ -881,8 +927,6 @@ initialize_tetromino_ptr_array:
     sw $t1, 20($t0)
     la $t1, Z_TETROMINO
     sw $t1, 24($t0)
-    la $t1, STAR_TETROMINO
-    sw $t1, 28($t0)
 
 
 # Fills the the SYMBOL_PTR_ARRAY with the symbol pointers. Make sure to call this on initilization.
@@ -1032,54 +1076,59 @@ SHADOW_IMAGE_WORD_LOAD_NOT_NEEDED:
 # Detects if a line is full and if so, clears it.
 # Uses registers t0 to t5 and $ra
 clear_lines:
-# What row we are currently checking
-li		$t0, 0		# $t0 = 0
-li		$t2, PLAYING_AREA_WIDTH_IN_BLOCKS		# $t2 = PLAYING_AREA_WIDTH_IN_BLOCKS
-li		$t5, PLAYING_AREA_HEIGHT_IN_BLOCKS		# $t5 = PLAYING_AREA_HEIGHT_IN_BLOCKS
+    # What row we are currently checking
+    li		$t0, 0		# $t0 = 0
+    li		$t2, PLAYING_AREA_WIDTH_IN_BLOCKS		# $t2 = PLAYING_AREA_WIDTH_IN_BLOCKS
+    li		$t5, PLAYING_AREA_HEIGHT_IN_BLOCKS		# $t5 = PLAYING_AREA_HEIGHT_IN_BLOCKS
 
 LOOP_THROUGH_ROWS_TO_CLEAR:
-# What column we are currently checking within the row
-li		$t1, 0		# $t1 = 0
+    # What column we are currently checking within the row
+    li		$t1, 0		# $t1 = 0
 
 LOOP_THROUGH_ROW_TO_CLEAR:
-mult	$t0, $t2			# $t0 * $t2 = Hi and Lo registers
-mflo	$t3					# copy Lo to $t3
-add		$t3, $t3, $t1		# $t3 = $t3 + $t1
-# Now $t3 is the index of the current block in the row within the tetromino grid
-la		$t4, tetromino_grid		# $t4 = &tetromino_grid
-add		$t4, $t4, $t3		# $t4 = $t4 + $t3
-# Now $t4 is the address of the current block in the row within the tetromino grid
-lb      $t4, 0($t4)		# $t4 = tetromino_grid[t4]
-beq		$t4, $zero, END_LOOP_THROUGH_ROW_TO_CLEAR		# if $t4 == $zero then goto END_LOOP_THROUGH_ROW_TO_CLEAR
+    mult	$t0, $t2			# $t0 * $t2 = Hi and Lo registers
+    mflo	$t3					# copy Lo to $t3
+    add		$t3, $t3, $t1		# $t3 = $t3 + $t1
+    # Now $t3 is the index of the current block in the row within the tetromino grid
+    la		$t4, tetromino_grid		# $t4 = &tetromino_grid
+    add		$t4, $t4, $t3		# $t4 = $t4 + $t3
+    # Now $t4 is the address of the current block in the row within the tetromino grid
+    lb      $t4, 0($t4)		# $t4 = tetromino_grid[t4]
+    beq		$t4, $zero, END_LOOP_THROUGH_ROW_TO_CLEAR		# if $t4 == $zero then goto END_LOOP_THROUGH_ROW_TO_CLEAR
 
-addi	$t1, $t1, 1			# $t1 = $t1 + 1
-bge		$t1, $t2, CLEAR_ROW		# if $t1 >= $t2 then goto CLEAR_ROW
-j		LOOP_THROUGH_ROW_TO_CLEAR				# jump to LOOP_THROUGH_ROW_TO_CLEAR
+    addi	$t1, $t1, 1			# $t1 = $t1 + 1
+    bge		$t1, $t2, CLEAR_ROW		# if $t1 >= $t2 then goto CLEAR_ROW
+    j		LOOP_THROUGH_ROW_TO_CLEAR				# jump to LOOP_THROUGH_ROW_TO_CLEAR
 
 CLEAR_ROW:
-# What column we are currently checking within the row
-li		$t1, 0		# $t1 = 0
+    # Update the score to reflect this row is cleared. We add 70 points
+    lw $t6, score
+    addi $t6, $t6, 42
+    sw $t6, score
+
+    # What column we are currently checking within the row
+    li		$t1, 0		# $t1 = 0
 
 CLEAR_ROW_LOOP:
-# Clear the row $t0
-mult	$t0, $t2			# $t0 * $t2 = Hi and Lo registers
-mflo	$t3					# copy Lo to $t3
+    # Clear the row $t0
+    mult	$t0, $t2			# $t0 * $t2 = Hi and Lo registers
+    mflo	$t3					# copy Lo to $t3
 
-add		$t3, $t3, $t1		# $t3 = $t3 + $t1
-la		$t4, tetromino_grid		# $t4 = &tetromino_grid
-add		$t4, $t4, $t3		# $t4 = $t4 + $t3
-# Now $t4 is the address of the block in tetromino grid that we want to clear
-li		$t3, 0		# $t3 = 0
-sb		$t3, 0($t4)		# $t4 = 0
+    add		$t3, $t3, $t1		# $t3 = $t3 + $t1
+    la		$t4, tetromino_grid		# $t4 = &tetromino_grid
+    add		$t4, $t4, $t3		# $t4 = $t4 + $t3
+    # Now $t4 is the address of the block in tetromino grid that we want to clear
+    li		$t3, 0		# $t3 = 0
+    sb		$t3, 0($t4)		# $t4 = 0
 
-addi    $t1, $t1, 1			# $t1 = $t1 + 1
-bge		$t1, $t2, END_LOOP_THROUGH_ROW_TO_CLEAR		# if $t1 >= $t2 then goto END_CLEAR_ROW_LOOP
-j		CLEAR_ROW_LOOP		# jump to CLEAR_ROW_LOOP
+    addi    $t1, $t1, 1			# $t1 = $t1 + 1
+    bge		$t1, $t2, END_LOOP_THROUGH_ROW_TO_CLEAR		# if $t1 >= $t2 then goto END_CLEAR_ROW_LOOP
+    j		CLEAR_ROW_LOOP		# jump to CLEAR_ROW_LOOP
 
 END_LOOP_THROUGH_ROW_TO_CLEAR:
-addi	$t0, $t0, 1			# $t0 = $t0 + 1
-bge		$t0, $t5, END_LOOP_THROUGH_ROWS_TO_CLEAR	# if $t0 >= $t5 then goto END_LOOP_THROUGH_ROWS_TO_CLEAR
-j       LOOP_THROUGH_ROWS_TO_CLEAR		# jump to LOOP_THROUGH_ROWS_TO_CLEAR
+    addi	$t0, $t0, 1			# $t0 = $t0 + 1
+    bge		$t0, $t5, END_LOOP_THROUGH_ROWS_TO_CLEAR	# if $t0 >= $t5 then goto END_LOOP_THROUGH_ROWS_TO_CLEAR
+    j       LOOP_THROUGH_ROWS_TO_CLEAR		# jump to LOOP_THROUGH_ROWS_TO_CLEAR
 
 END_LOOP_THROUGH_ROWS_TO_CLEAR:
-jr		$ra		# return
+    jr		$ra		# return
