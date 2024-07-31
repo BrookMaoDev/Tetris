@@ -276,8 +276,7 @@ NO_KEY_PRESSED_PAUSED_STATE:
     j FINALIZE_FRAME_AND_SLEEP # complete the frame and sleep. 
 P_PRESSED_PAUSED_STATE:
     # unpause and go to the game. (set game_state to 0)
-    li $a0, 0
-    sw $a0, game_state
+    sw $0, game_state
 
     # set to no key pressed so we don't pause immediately
     li $t1, 0
