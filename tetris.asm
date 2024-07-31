@@ -91,7 +91,7 @@ ADDR_KBRD:
                     .eqv LIGHT_GREY, 0xbcbcbc
 
     # The time to sleep between frames in milliseconds.
-                    .eqv SLEEP_TIME_IN_MS, 300
+                    .eqv SLEEP_TIME_IN_MS, 50
 
                     .eqv MMIO_KEY_PRESSED_STATUS, 0xffff0000
                     .eqv MMIO_KEY_PRESSED_VALUE, 0xffff0004
