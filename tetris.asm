@@ -1,4 +1,5 @@
- #####################################################################
+
+  #####################################################################
     # CSCB58 Summer 2024 Assembly Final Project - UTSC
     # Student1: Brook Mao, 1010146815, maofengx, brook.mao@mail.utoronto.ca
     # Student2: Richard Zhang, 1010423276, zha15296, zecro.zhang@mail.utoronto.ca
@@ -44,59 +45,60 @@
 
     # The address of the bitmap display. Don't forget to connect it!
 ADDR_DSPL: 
-                    .word 0x10008000
+    .word 0x10008000
 
     # The address of the keyboard. Don't forget to connect it!
 ADDR_KBRD: 
-                    .word 0xffff0000
+    .word 0xffff0000
 
     # The height of a single unit in pixels.
-                    .eqv UNIT_HEIGHT, 4
+    .eqv UNIT_HEIGHT, 4
 
     # The height of the display in unit heights.
-                    .eqv HEIGHT_IN_UNITS, 128
+    .eqv HEIGHT_IN_UNITS, 128
 
     # The width of a single unit in pixels.
-                    .eqv UNIT_WIDTH, 4
+    .eqv UNIT_WIDTH, 4
 
     # The width of the display in unit widths.
-                    .eqv WIDTH_IN_UNITS, 64
+    .eqv WIDTH_IN_UNITS, 64
     # log_2(WIDTH_IN_UNITS) - for bitshifting
-                    .eqv WIDTH_IN_UNITS_LOG_TWO, 6
+    .eqv WIDTH_IN_UNITS_LOG_TWO, 6
     # The width of the display in bytes(ie width in units * 4).
-                    .eqv WIDTH_IN_BYTES, 256
+    .eqv WIDTH_IN_BYTES, 256
 
     # The height of a grid block in pixels.
-                    .eqv GRID_HEIGHT_IN_UNITS, 4
-                    .eqv GRID_WIDTH_IN_UNITS, 4
-                    .eqv GRID_WIDTH_IN_UNITS_LOG_2, 2
+    .eqv GRID_HEIGHT_IN_UNITS, 4
+    .eqv GRID_WIDTH_IN_UNITS, 4
+    .eqv GRID_WIDTH_IN_UNITS_LOG_2, 2
 
     # Constants of the screen, for image drawing
-                    .eqv SCREEN_WIDTH_IN_UNITS 64
-                    .eqv SCREEN_AREA_IN_UNITS 8192
+    .eqv SCREEN_WIDTH_IN_UNITS 64
+    .eqv SCREEN_AREA_IN_UNITS 8192
 
     # Constants defining the top-left corner of the playing area.
-                    .eqv PLAYING_AREA_START_X_IN_UNITS, 4
-                    .eqv PLAYING_AREA_START_Y_IN_UNITS, 16
+    .eqv PLAYING_AREA_START_X_IN_UNITS, 4
+    .eqv PLAYING_AREA_START_Y_IN_UNITS, 16
 
     # Constants defining the size of the playing area.
-                    .eqv PLAYING_AREA_WIDTH_IN_UNITS, 56
-                    .eqv PLAYING_AREA_HEIGHT_IN_UNITS, 108
+    .eqv PLAYING_AREA_WIDTH_IN_UNITS, 56
+    .eqv PLAYING_AREA_HEIGHT_IN_UNITS, 108
 
-                    .eqv PLAYING_AREA_WIDTH_IN_BLOCKS, 14
-                    .eqv PLAYING_AREA_HEIGHT_IN_BLOCKS, 27
+    .eqv PLAYING_AREA_WIDTH_IN_BLOCKS, 14
+    .eqv PLAYING_AREA_HEIGHT_IN_BLOCKS, 27
 
     # Colour constants.
-                    .eqv DARK_GREY, 0x7e7e7e
-                    .eqv LIGHT_GREY, 0xbcbcbc
+    .eqv DARK_GREY, 0x7e7e7e
+    .eqv LIGHT_GREY, 0xbcbcbc
 
-    # The time to sleep between frames in milliseconds.
-                    .eqv SLEEP_TIME_IN_MS, 50
+    # The time to sleep between ticks in milliseconds.
+    .eqv SLEEP_TIME_IN_MS, 50
+    .eqv TICKS_PER_FRAME, 2
 
-                    .eqv MMIO_KEY_PRESSED_STATUS, 0xffff0000
-                    .eqv MMIO_KEY_PRESSED_VALUE, 0xffff0004
+    .eqv MMIO_KEY_PRESSED_STATUS, 0xffff0000
+    .eqv MMIO_KEY_PRESSED_VALUE, 0xffff0004
 
-                    .eqv SPEED_UP_GRAVITY_AFTER_SCORE, 250
+    .eqv SPEED_UP_GRAVITY_AFTER_SCORE, 250
 
 SYMBOL_ZERO: .word 0x00050003, 0x00007b6f
 SYMBOL_ONE: .word 0x00050003, 0x00007493
@@ -116,6 +118,7 @@ LOGO_SHADOW: .word 0x00100010, 0x00800000, 0x02a002a0, 0x00c00000, 0x03c000c0, 0
 BACKGROUND_IMAGE: .word 0x00800040, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xffff1fff, 0xfffff013, 0xffff1fff, 0xfffff839, 0xfffe1fff, 0xfffff838, 0xfffe0fff, 0xfffffc38, 0x7ffe07f8, 0xfffffe3c, 0x3ffc0000, 0xfffffe0c, 0x1ffc0000, 0xffffff04, 0x07f80003, 0xffffff00, 0x03f80007, 0xffffff00, 0x70f00003, 0x3fffff80, 0xf8000001, 0x1fffff80, 0xf8000000, 0x07ffff81, 0xfc007fc0, 0x03ffff83, 0xfc00fff8, 0x80ffffc3, 0xfc00fffc, 0xc03fffc3, 0xfe60fffc, 0x8c0fff81, 0x0078fff8, 0x1f81ff80, 0x007cffe0, 0x3fc07f00, 0x007c3fc3, 0x7ff0000c, 0x007e000f, 0x7ff8003e, 0x007f001f, 0xfffc007e, 0x003f003f, 0xffe000fe, 0x0c3f801f, 0x000000fe, 0x1e1f8000, 0x0000007c, 0x1f0f0000, 0x0000001c, 0x1f8001ff, 0x00000000, 0x1f801fff, 0x07e0fc00, 0x1fc07fff, 0x3ff1ff80, 0x1fe07fff, 0xfff3ffe0, 0x1fe0ffff, 0xfff3fff8, 0x1ff0ffff, 0xfff3fffc, 0x0ff1ffff, 0xffe3fffe, 0x0ff1ffff, 0xffc3ffff, 0x87f3ffff, 0x1e03ffff, 0xc3e3ffff, 0x0003ffff, 0xe003ffff, 0x0003ffff, 0xe007ffff, 0xc003ffff, 0xf007ffff, 0xf003ffff, 0xf007ffff, 0xf823ffff, 0xf00fffff, 0xfcf3ffff, 0xe00fffff, 0xf8f3ffff, 0xe00fffff, 0xe1f3ffff, 0xc00fffff, 0x01e3ffff, 0x800fffff, 0x01e3ffff, 0x800ffffe, 0x01c1ffff, 0x000ffff8, 0x0181ffff, 0x3c0fffe0, 0xc001fffc, 0x7f07ff07, 0xe001fff8, 0x7f83f81f, 0xe000fff0, 0x7fc0003f, 0xe000ffc0, 0x7f80007f, 0xe000ff80, 0x7f00007f, 0xe0007e00, 0x7c1f803f, 0xc1c07800, 0x701ff81f, 0x87e00000, 0x001fff07, 0x1ff00000, 0x001fff81, 0x3ff80000, 0x000fffc0, 0x7ffc03fe, 0x0007ffc0, 0xfffc0fff, 0x0003ffc0, 0x7ffc3fff, 0x0001ff80, 0x00003fff, 0x0000ff00, 0x00007fff, 0x07f81c00, 0xfe007fff, 0x0ffe0001, 0xffe03ffe, 0x0fff8001, 0xfffc3ffe, 0x07ffc3e1, 0xfffe3ffc, 0x07ffe3f3, 0xffff1ffc, 0x03fff3f3, 0xffff0ff8, 0x01fff1f3, 0xfffe0ff8, 0x00fff9e3, 0xfff807f0, 0x307ff8e3, 0xfff003f0, 0x383ff843, 0xffe001e0, 0x3e1ff800, 0xff8001c0, 0x3f0ff000, 0xff060000, 0x3f87f080, 0xfc0f000c, 0x3fc1c3e0, 0xf01f801e, 0x3fe007f8, 0xe01fc03e, 0x1fe00ff8, 0x801fe03f, 0x1ff01ffc, 0x003ff07f, 0x0fe03ffe, 0x003ff07f, 0x87e07fff, 0x7c3ff87f, 0x8000ffff, 0xfe3ff83f, 0x8000ffff, 0xfe3ffc1f, 0x8001ffff, 0xfe3ff80f, 0xc003ffff, 0xfe1fe007, 0xc003ffff, 0xfc000003, 0xc007ffff, 0xf80007e0, 0x000fffff, 0xf01e03e0, 0x000fffff, 0xc0ffc3e0, 0x001fffff, 0x83ffe1e0, 0xe01fffff, 0x03fff1c0, 0xf83fffff, 0x01fff08f, 0xfc3fffff, 0xf0fff01f, 0xfc7fffff, 0xfc3ff03f, 0xfc7fffff, 0xfe07e03f, 0xfc7fffff, 0xff00001f, 0xfc7fffff, 0xff00001f, 0xfc7fffff, 0xfe00000f, 0xf87fffff, 0xf8000007, 0xf807fffe, 0xe0383803, 0xf0003ff0, 0x00f83f01, 0xf0000000, 0x03f83fe0, 0x20000000, 0x07f81ff0, 0x00000000, 0x1ffc1ff8, 0x00000000, 0x3ffc0ff8, 0x00000000, 0x3ffc07f8, 0x0003ff00, 0x3ffc01f0, 0x0007ffe0, 0x3ffc0003, 0xf003fff0, 0x1ff8000f, 0xfc03fff0, 0x07f80c1f, 0xff03fff0, 0x00f00c1f, 0xff81ffe0, 0x00001c3f, 0x00000000, 0x00000000, 0x00000000
 
 SCORE_TEXT: .word 0x00050015, 0xa2277777, 0x1dd45e2a, 0x77789a8a, 0x00000075
+HI_SCORE_TEXT: .word 0x00050009, 0x289e4a75, 0x00000759
 PAUSE_TEXT: .word 0x000a0032, 0xf8c63e1f, 0x8c8cf9f8, 0x60663319, 0xcc663235, 0xc8e18180, 0x06033198, 0xc6632386, 0x7e19f878, 0x638319fc, 0x66303860, 0xe1819c0c, 0x603198c0, 0x63038606, 0x58198cfe, 0xe1f18c0d, 0x0003e7e3 
 PRESS_P_TO_TEXT: .word 0x0007002b, 0x38319de7, 0x52294b9c, 0x4a624242, 0x12120211, 0x70633bcf, 0x20461890, 0x50c48084, 0x24042522, 0x20c67486, 0x00000e20
 UNPAUSE_TEXT: .word 0x00070024, 0x645e7451, 0x45294d1e, 0x52955129, 0xe7551214, 0x1651e645, 0x65128452, 0x4e294521, 0x0e639214
@@ -186,6 +189,8 @@ game_state: .word 0
 
 # buffer to copy the frame into (screen size). This is to prevent flickering.
 frame_buffer: .word 0:SCREEN_AREA_IN_UNITS
+# load this with the amount of key presses allowed per frame. This is to make movement easier so the user can move multiple times per frame.
+ticks_per_frame: .word 4
 
     ##############################################################################
     # Code
@@ -219,6 +224,13 @@ main:
     li $a1, 1
     li $a2, 0xffffff
     la $a3, SCORE_TEXT
+    jal draw_shadow
+
+    # draw the high score text
+    li $a0, 17
+    li $a1, 7
+    li $a2, 0xffffff
+    la $a3, HI_SCORE_TEXT
     jal draw_shadow
 
 game_loop: 
@@ -387,6 +399,21 @@ NO_KEY_PRESSED:
     sw $s0, ct_x
     sw $s1, ct_y
 MOVE_IS_LEGAL:
+    # check if we want to draw the frame, or sleep and let the user continue moving
+    lw $t0, ticks_per_frame
+
+    # if we've let the user move enough, continue
+    beq $t0, $0, CONTINUE_TO_PHYSICS_AND_DRAW_FRAME
+    # otherwise, decrement pointer, and sleep
+    addi $t0, $t0, -1
+    sw $t0, ticks_per_frame
+    j SLEEP_UNTIL_NEXT_FRAME
+
+CONTINUE_TO_PHYSICS_AND_DRAW_FRAME:
+    # reset the ticks counter
+    li $t0, TICKS_PER_FRAME
+    SW $t0, ticks_per_frame
+
     # Physics
     # Apply gravity
     jal move_down # move the current tetromino down
@@ -578,6 +605,47 @@ SCORE_LENGTH_COUNTER_LOOP:
     lw $a3, score # number to draw
     jal draw_number
 
+    # do the same but for high score.
+    lw $t0, high_score
+    lw $t1, score # need to restore this from before.
+
+    # update high score if score is higher
+    # if score <= high score, no update needed.
+    ble $t1, $t0, NO_HIGH_SCORE_UPDATE_NEEDED
+    move $t0, $t1
+    sw $t0, high_score
+NO_HIGH_SCORE_UPDATE_NEEDED:
+
+    # Find length of high score.
+    li $t1, 0
+    li $t2, 10
+    # count how many times score can be divided by 10 to get the digit count
+HIGH_SCORE_LENGTH_COUNTER_LOOP:
+    div $t0, $t2
+    mflo $t0
+    addi $t1, $t1, 1
+    bgtz $t0, HIGH_SCORE_LENGTH_COUNTER_LOOP
+
+    sll $t1, $t1, 2
+
+    # start at (27, 7)
+    # fill the rect to overwrite the previous high score.
+    # call w/ args: 
+    move $a2, $t1 # width
+    la $t0, frame_buffer # ptr to screen
+    li $t1, 0x0 # black 
+    li $a0, 27 # start x
+    li $a1, 7 # start y
+    li $a3, 5 # height
+    jal fill_rect
+
+    # draw the score.
+    addi $a0, $a2, 27 # end x = width + 27
+    li $a1, 7 # start y
+    li $a2, 0xffffff # colour 
+    lw $a3, high_score # number to draw
+    jal draw_number
+
 FINALIZE_FRAME_AND_SLEEP:
     # copy the frame buffer on screen
     lw $t0, ADDR_DSPL # t0 = display address.
@@ -600,6 +668,7 @@ FRAME_DRAW_LOOP:
     # loop while there are pixels remaining
     bgtz $t2, FRAME_DRAW_LOOP
 
+SLEEP_UNTIL_NEXT_FRAME:
     # 4. Sleep
     li $v0, 32 # $v0 = 32
     li $a0, SLEEP_TIME_IN_MS # $a0 = SLEEP_TIME_IN_MS
