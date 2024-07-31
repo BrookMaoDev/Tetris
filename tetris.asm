@@ -13,18 +13,36 @@
     #       
     # Which milestones have been reached in this submission?
     # (See the assignment handout for descriptions of the milestones)
-    # - Milestone 1/2/3/4/5 (choose the one the applies)
-    #       
+    # - Milestone 5 
+    #
     # Which approved features have been implemented?
     # (See the assignment handout for the list of features)
     # Easy Features:
     # 1. Gravity
-    # 2. Each tetromino type has a unique colour
+    # 2. Game over screen with retry option.
+    # 3. Paused screen with message.
+    # 4. High score is tracked and displayed, right below score.
+    # 5. Each tetromino type has a unique colour.
     # Hard Features:
     # 1. Tracks and displays the score
     # 2. Full set of tetrominoes
     # How to play:
-    # (Include any instructions)
+    # When the game is running, press: 
+    #   w - rotate 90 deg clockwise
+    #   a - move left
+    #   s - move the piece down 4 times as fast
+    #   d - move right
+    #   p - pause the game
+    #   q - quit the game
+    #   Note: movement and rotation only works, when you're not moving/rotating into a wall or another piece.
+    # 
+    # On the pause screen, you can press p to unpause.
+    #   No other keys are handled on this screen.
+    # Similarly on game over screen, you can only press r to restart.
+    #
+    # Additional notes:
+    #   The gravity increases to 2x after you reach a score of 250.
+    #
     # Link to video demonstration for final submission:
     # - (insert YouTube / MyMedia / other URL here). Make sure we can view it!
     #       
@@ -32,7 +50,7 @@
     # - yes
     #       
     # Any additional information that the TA needs to know:
-    # - (write here, if any)
+    # N/A
     #       
     #####################################################################
 
