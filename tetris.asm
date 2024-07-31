@@ -72,6 +72,9 @@ ADDR_KBRD:
     .eqv GRID_WIDTH_IN_UNITS, 4
     .eqv GRID_WIDTH_IN_UNITS_LOG_2, 2
 
+    .eqv GRID_CENTER_WIDTH_IN_UNITS 2
+    .eqv GRID_CENTER_HEIGHT_IN_UNITS 2
+
     # Constants of the screen, for image drawing
     .eqv SCREEN_WIDTH_IN_UNITS 64
     .eqv SCREEN_AREA_IN_UNITS 8192
@@ -158,7 +161,7 @@ Z_TETROMINO: .byte
     .eqv TETROMINO_COUNT, 7
 TETROMINO_PTR_ARRAY: .word 0:7 # to be initialized at run time.
 TETROMINO_SIZE_ARRAY: .byte 3, 3, 4, 2, 3, 3, 3
-TETROMINO_COLOUR_ARRAY: .word 0x9ee4ff, 0x0008ff, 0xd9ff00, 0x82ffc1, 0xba82ff, 0xff0000, 0xff00a6
+TETROMINO_COLOUR_ARRAY: .word 0x9ee4ff, 0x0008ff, 0xd9ff00, 0x82ffc1, 0xba82ff, 0xb02020, 0xff00a6
 
     ##############################################################################
     # Mutable Data
@@ -290,7 +293,7 @@ NO_KEY_PRESSED_GAME_OVER_STATE:
     # draw shadow with start x, start y, colour, image ptr
     li $a0, 7
     li $a1, 36
-    li $a2, 0x690000
+    li $a2, 0x000000
     la $a3, GAME_OVER_TEXT
     jal draw_shadow
 
@@ -510,7 +513,12 @@ DRAW_TETROMINO_COLOR_SQUARE:
 
     # load the colour value into t1
     lw $t1, 0($t4)
-    j DRAW_SQUARE # jump to DRAW_SQUARE
+
+    # draw a specific tetromino block
+    jal draw_tblock
+
+    li $a3, GRID_HEIGHT_IN_UNITS # inc like below (since we're skipping that block)
+    j INCREMENT_X
 
 DRAW_SQUARE: 
     jal fill_rect # fill_rect(PLAYING_AREA_HEIGHT_IN_UNITS, PLAYING_AREA_START_Y_IN_UNITS, GRID_WIDTH_IN_UNITS, GRID_HEIGHT_IN_UNITS, ADDR_DSPL, LIGHT_GREY)
@@ -559,8 +567,20 @@ INNER_DRAW_CT_LOOP:
 
     # start_x = col + grid_x
     add $a0, $s4, $s5
+    # a0 = grid_x * GRID_WIDTH_IN_UNITS + PLAYING_AREA_START_X_IN_UNITS
+    sll $a0, $a0, GRID_WIDTH_IN_UNITS_LOG_2
+    add $a0, $a0, PLAYING_AREA_START_X_IN_UNITS
+
     # start_y = row + grid_y
     add $a1, $s3, $s6
+    # a1 = same computations for x but for y
+    # grid and unit are assumed to be squares
+    sll $a1, $a1, GRID_WIDTH_IN_UNITS_LOG_2
+    add $a1, $a1, PLAYING_AREA_START_Y_IN_UNITS
+
+    # load the width/height of the grid blocks
+    li $a2, GRID_WIDTH_IN_UNITS
+    li $a3, GRID_HEIGHT_IN_UNITS
     jal draw_tblock
 INNER_DRAW_CT_LOOP_FINAL:
     addi $s4, $s4, 1 # col ++
@@ -882,31 +902,96 @@ CT_COLLIDING_INNER_LOOP_END:
     li $v0, 0
     jr $ra
 
-    # a0 = grid x (modified)
-    # a1 = grid y (modified)
+    # arguments for fill rect(but make sure it's a sqaure)
     # ra = return address
     # uses registers v0 + registers needed for fill_rect
-draw_tblock: 
-    # a0 = grid_x * GRID_WIDTH_IN_UNITS + PLAYING_AREA_START_X_IN_UNITS
-    sll $a0, $a0, GRID_WIDTH_IN_UNITS_LOG_2
-    add $a0, $a0, PLAYING_AREA_START_X_IN_UNITS
+draw_tblock:
+    # save ra to stack
+    addi $sp, $sp, -4
+    sw $ra, 0($sp)
 
-    # a1 = same computations for x but for y
-    # grid and unit are assumed to be squares
-    sll $a1, $a1, GRID_WIDTH_IN_UNITS_LOG_2
-    add $a1, $a1, PLAYING_AREA_START_Y_IN_UNITS
+    # save tetromino colour to stack
+    addi $sp, $sp, -4
+    sw $t1, 0($sp)
 
-    # load the width/height of the grid blocks
-    li $a2, GRID_WIDTH_IN_UNITS
-    li $a3, GRID_HEIGHT_IN_UNITS
+    # See colour change algorithm below. 
+    # Shifting down is similar but simpler.
+    li $t4, 0x00010101 # t4 = val used to remove all last bits(of each colour)
 
-    # save the return address and call fill_rect
-    move $v0, $ra
+    # t1 = (r, g, b) of t1 / 2
+    and $t1, $t1, $t4
+    sra $t1, $t1, 1
+
+    # fill the entire square with the darker colour
     jal fill_rect
 
-    # return to caller
-    move $ra, $v0
-    jr $v0
+    # draw the center square normal coloured.
+    # restore colour from stack
+    lw $t1, 0($sp) # this will be decremented below
+    # add 1 to x,y to move it right and down
+    addi $a0, $a0, 1
+    addi $a1, $a1, 1
+    # set width/height
+    li $a2, GRID_CENTER_WIDTH_IN_UNITS
+    li $a3, GRID_CENTER_HEIGHT_IN_UNITS
+
+    jal fill_rect
+
+    # restore the changed x,y
+    addi $a0, $a0, -1
+    addi $a1, $a1, -1
+
+    # restore colour again (this is decremented later)
+    lw $t1, 0($sp)
+
+    # Change the tetromino colour to be 2x brighter. 
+    # Algorithm is to multiply each colour code by 2 and cap it at 0xff.
+    # To achieve this, for each colour code 0xff, we'll take the first bit,
+    # then "sign extend" and save it in t3.
+    # The original colour, we will remove all the first bits, and then shift right(so no overflows).
+    # Then we use an or operation to make the colour code max if it had a first bit, since 128*2 > 255 = 0xff
+    li $t4, 0x00808080 # t4 = val used to get all first bits
+    and $t2, $t1, $t4 # t2 = colour & first bits
+
+    li $t4, 0x007f7f7f # opposite of above to get all BUT the first bit
+    and $t1, $t1, $t4 # remove first bits from colour
+    sll $t1, $t1, 1 # x2
+
+    # "sign extend" t2
+    sll $t3, $t2, 1
+    or $t2, $t2, $t3
+
+    sll $t3, $t2, 2
+    or $t2, $t2, $t3
+
+    sll $t3, $t2, 4
+    or $t2, $t2, $t3
+
+    # update the colour so values above 128 are multiplied correctly
+    or $t1, $t1, $t2
+
+    # draw the two lighter shade colours.
+    # width = tetromino size, height = 1
+    li $a2, GRID_WIDTH_IN_UNITS
+    li $a3, 1
+    jal fill_rect
+
+    # draw the vertical lighter shade
+    li $a2, 1
+    li $a3, GRID_HEIGHT_IN_UNITS
+    jal fill_rect
+
+    # restore modified width
+    li $a2, GRID_WIDTH_IN_UNITS
+
+    # final restore colour
+    lw $t1, 0($sp)
+    addi $sp, $sp, 4
+    # restore ra 
+    lw $ra, 0($sp)
+    addi $sp, $sp, 4
+
+    jr $ra
 
 
     # arguments: a0 to a3, v0 and t0, t1
