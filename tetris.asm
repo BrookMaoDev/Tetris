@@ -1443,5 +1443,4 @@ TETROMINO_CLEAR_LOOP:
     lw $ra, 0($sp)
     addi $sp, $sp, 4
 
-    jr $ra 
-
+    jr $ra # return
