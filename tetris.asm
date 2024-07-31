@@ -96,6 +96,8 @@ ADDR_KBRD:
                     .eqv MMIO_KEY_PRESSED_STATUS, 0xffff0000
                     .eqv MMIO_KEY_PRESSED_VALUE, 0xffff0004
 
+                    .eqv SPEED_UP_GRAVITY_AFTER_SCORE, 250
+
 SYMBOL_ZERO: .word 0x00050003, 0x00007b6f
 SYMBOL_ONE: .word 0x00050003, 0x00007493
 SYMBOL_TWO: .word 0x00050003, 0x000073e7
@@ -280,6 +282,7 @@ RUN_STATE:
     beq $t0, 0x61, A_PRESSED # if $t0 == 'a' then goto A_PRESSED
     beq $t0, 0x64, D_PRESSED # if $t0 == 'd' then goto D_PRESSED
     beq $t0, 0x73, S_PRESSED # if $t0 == 's' then goto S_PRESSED
+    beq $t0, 0x71, Q_PRESSED # if $t0 == 'q' then goto Q_PRESSED
     j NO_KEY_PRESSED # if no relevant key pressed
 
 P_PRESSED_RUN_STATE:
@@ -333,6 +336,13 @@ S_PRESSED:
     lw $t0, score
     addi $t0, $t0, 1
     sw $t0, score
+    j NO_KEY_PRESSED # jump to NO_KEY_PRESSED
+
+Q_PRESSED:
+    # exit the game
+    li		$v0, 10		# $v0 = 10
+    syscall
+
 NO_EXTRA_MOVE_DOWN_POINT:
 
     j NO_KEY_PRESSED # jump to NO_KEY_PRESSED
@@ -529,6 +539,16 @@ SCORE_LENGTH_COUNTER_LOOP:
     # Physics
     # Apply gravity
     jal move_down # move the current tetromino down
+
+    li $a2, SPEED_UP_GRAVITY_AFTER_SCORE
+    lw $a3, score
+    bge $a3, $a2, SCORE_TOO_HIGH # if score >= SPEED_UP_GRAVITY_AFTER_SCORE then goto SCORE_TOO_HIGH
+    j SCORE_NORMAL # goto SCORE_NORMAL
+
+SCORE_TOO_HIGH:
+    jal move_down # The score is too high, difficulty is increased by moving the tetromino down faster.
+
+SCORE_NORMAL:
     jal clear_lines # clear any lines that are full
 
 FINALIZE_FRAME_AND_SLEEP:
