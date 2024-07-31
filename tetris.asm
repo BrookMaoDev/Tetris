@@ -119,6 +119,9 @@ SCORE_TEXT: .word 0x00050015, 0xa2277777, 0x1dd45e2a, 0x77789a8a, 0x00000075
 PAUSE_TEXT: .word 0x000a0032, 0xf8c63e1f, 0x8c8cf9f8, 0x60663319, 0xcc663235, 0xc8e18180, 0x06033198, 0xc6632386, 0x7e19f878, 0x638319fc, 0x66303860, 0xe1819c0c, 0x603198c0, 0x63038606, 0x58198cfe, 0xe1f18c0d, 0x0003e7e3 
 PRESS_P_TO_TEXT: .word 0x0007002b, 0x38319de7, 0x52294b9c, 0x4a624242, 0x12120211, 0x70633bcf, 0x20461890, 0x50c48084, 0x24042522, 0x20c67486, 0x00000e20
 UNPAUSE_TEXT: .word 0x00070024, 0x645e7451, 0x45294d1e, 0x52955129, 0xe7551214, 0x1651e645, 0x65128452, 0x4e294521, 0x0e639214
+GAME_OVER_TEXT: .word 0x00070032, 0xf0f6379e, 0x528def44, 0x85142055, 0x81494818, 0xee621450, 0xd1423d25, 0x1414a17b, 0x84a14508, 0xa4205052, 0x4149e4a4, 0x22f18f0f
+PRESS_R_TO_TEXT: .word 0x0007002b, 0x38319de7, 0x52294b9c, 0x4a624242, 0x12120211, 0x70633bcf, 0x20461890, 0x50c48284, 0x24242522, 0x20c67486, 0x00000e21
+RESTART_TEXT: .word 0x0007001f, 0xf3bdcce7, 0x52524914, 0xe929208a, 0x5477919c, 0x4a2a4902, 0xa5252491, 0x00929233
 
 L_TETROMINO: .byte 
     0, 1, 0,
@@ -174,7 +177,8 @@ ct_auxiliary_grid: .space 16
 ct_grid_size: .word 3
     # Grid of all tetromino blocks which have been placed.
 tetromino_grid: .byte 0:378
-tetromino_grid_len: .word 378
+    .eqv TETROMINO_GRID_LEN, 378
+# there might be memory corruption happening here... unable to reproduce though.
 score: .word 0 
 high_score: .word 0
 # 0 = running, 1 = paused, 2 = game over
@@ -230,13 +234,13 @@ game_loop:
     # check if the game is in the game over state
     lw $t2, game_state # t2 = game state
     beq $t2, $0, RUN_STATE
+    beq $t2, 2, GAME_OVER_STATE
 
 PAUSED_STATE:
     bne $t1, 1, NO_KEY_PRESSED_PAUSED_STATE
     # check if p is pressed, to unpause.
     beq $t0, 0x70, P_PRESSED_PAUSED_STATE
 NO_KEY_PRESSED_PAUSED_STATE:
-
     # otherwise, draw shadow with start x, start y, colour, image ptr
     li $a0, 7
     li $a1, 36
@@ -266,8 +270,34 @@ P_PRESSED_PAUSED_STATE:
     j RUN_STATE
 
 GAME_OVER_STATE:
+    bne $t1, 1, NO_KEY_PRESSED_GAME_OVER_STATE
+    # check if r is pressed, restart.
+    beq $t0, 0x72, R_PRESSED_GAME_OVER_STATE
+NO_KEY_PRESSED_GAME_OVER_STATE: 
     # display the game over message.
+    # draw shadow with start x, start y, colour, image ptr
+    li $a0, 7
+    li $a1, 36
+    li $a2, 0x690000
+    la $a3, GAME_OVER_TEXT
+    jal draw_shadow
+
+    li $a0, 11
+    li $a1, 55
+    la $a3, PRESS_R_TO_TEXT
+    jal draw_shadow
+
+    li $a0, 14
+    li $a1, 65
+    la $a3, RESTART_TEXT
+    jal draw_shadow
+
     j FINALIZE_FRAME_AND_SLEEP # complete the frame and sleep. 
+R_PRESSED_GAME_OVER_STATE:
+    # restart the game.
+    jal reset_game
+
+    j RUN_STATE
 
 RUN_STATE:
     # if no key pressed. 
@@ -357,10 +387,22 @@ NO_KEY_PRESSED:
     sw $s0, ct_x
     sw $s1, ct_y
 MOVE_IS_LEGAL:
+    # Physics
+    # Apply gravity
+    jal move_down # move the current tetromino down
 
-    # 2b. Update locations (paddle, ball)
+    li $a2, SPEED_UP_GRAVITY_AFTER_SCORE
+    lw $a3, score
+    bge $a3, $a2, SCORE_TOO_HIGH # if score >= SPEED_UP_GRAVITY_AFTER_SCORE then goto SCORE_TOO_HIGH
+    j SCORE_NORMAL # goto SCORE_NORMAL
+
+SCORE_TOO_HIGH:
+    jal move_down # The score is too high, difficulty is increased by moving the tetromino down faster.
+
+SCORE_NORMAL:
+    jal clear_lines # clear any lines that are full
+
     # 3. Draw the screen
-
 DRAW_SCREEN:
     # Draw the checkered pattern
     li $a0, PLAYING_AREA_START_X_IN_UNITS # $a0 = PLAYING_AREA_START_X_IN_UNITS
@@ -535,21 +577,6 @@ SCORE_LENGTH_COUNTER_LOOP:
     li $a2, 0xffffff # colour 
     lw $a3, score # number to draw
     jal draw_number
-
-    # Physics
-    # Apply gravity
-    jal move_down # move the current tetromino down
-
-    li $a2, SPEED_UP_GRAVITY_AFTER_SCORE
-    lw $a3, score
-    bge $a3, $a2, SCORE_TOO_HIGH # if score >= SPEED_UP_GRAVITY_AFTER_SCORE then goto SCORE_TOO_HIGH
-    j SCORE_NORMAL # goto SCORE_NORMAL
-
-SCORE_TOO_HIGH:
-    jal move_down # The score is too high, difficulty is increased by moving the tetromino down faster.
-
-SCORE_NORMAL:
-    jal clear_lines # clear any lines that are full
 
 FINALIZE_FRAME_AND_SLEEP:
     # copy the frame buffer on screen
@@ -1029,7 +1056,31 @@ spawn_new_tetromino:
     li $t3, 0 # $t3 = 0
     sw $t2, 0($t0) # $t2 = ct_x
     sw $t3, 0($t1) # $t3 = ct_y
-    jr $ra # jump to $ra
+
+    # Check for collisions. If there is a collision, it's game over.
+    # push ra to stack
+    addi $sp, $sp, -4
+    sw $ra, 0($sp)
+
+    jal ct_is_colliding # v0 = 0 means not colliding
+    
+    # load ra back from the stack.
+    lw $ra, 0($sp)
+    addi $sp, $sp, 4
+
+# if not colliding
+beq $v0, $0, SPAWN_TETROMINO_SUCCESS
+    # otherwise, game over
+
+    # set state to game over.
+    li $t0, 2
+    sw $t0, game_state
+
+    j DRAW_SCREEN # have the game advance one more frame in the run state.
+
+SPAWN_TETROMINO_SUCCESS: 
+    jr $ra # return
+
 
 # Fills the TETROMINO_PTR_ARRAY with pointers to the tetromino grids.
 initialize_tetromino_ptr_array:
@@ -1341,3 +1392,56 @@ END_LOOP_THROUGH_ROW_TO_SHIFT:
 
 END_LOOP_THROUGH_ROWS_TO_SHIFT:
     jr		$ra		# return
+
+
+# Resets the game to the initial state.
+# uses registers ... 
+reset_game: 
+    # clear the tetromino_grid
+
+    # t0 = tetromino grid ptr
+    la $t0, tetromino_grid
+
+    # t1 = word count of the tetromino grid
+    li $t1, TETROMINO_GRID_LEN
+    sra $t1, $t1, 2 # this can't be optimized by -4 as the tetromino board isn't divisible by 4
+TETROMINO_CLEAR_LOOP: 
+    sw $0, 0($t0) # clear the word
+    # dec pointer and inc address
+    addi $t1, $t1, -1
+    addi $t0, $t0, 4
+    bgtz $t1, TETROMINO_CLEAR_LOOP
+
+    # clear the remaining half word
+    sh $0, 0($t0)
+
+    # reset the score
+    sw $0, score
+
+    # reset the game state
+    sw $0, game_state
+
+    # move ra onto stack.
+    addi $sp, $sp, -4
+    sw $ra, 0($sp)
+
+    # draw over the score number(since on each frame the background rect only clears as much as needed)
+    # start at (39, 1)
+    # call it with arguments: 
+    la $t0, frame_buffer # ptr to screen
+    li $t1, 0x0 # black 
+    li $a0, 39 # start x
+    li $a1, 1 # start y
+    li $a2, 25 # width (rest of screen)
+    li $a3, 5 # height
+    jal fill_rect
+
+    # respawn a new tetromino.
+    jal spawn_new_tetromino
+
+    # retrieve ra from stack and return
+    lw $ra, 0($sp)
+    addi $sp, $sp, 4
+
+    jr $ra 
+
