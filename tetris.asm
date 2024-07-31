@@ -916,7 +916,7 @@ draw_tblock:
 
     # See colour change algorithm below. 
     # Shifting down is similar but simpler.
-    li $t4, 0x00010101 # t4 = val used to remove all last bits(of each colour)
+    li $t4, 0x00fefefe # t4 = val used to remove all last bits(of each colour)
 
     # t1 = (r, g, b) of t1 / 2
     and $t1, $t1, $t4
