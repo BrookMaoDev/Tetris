@@ -41,10 +41,12 @@
     # Similarly on game over screen, you can only press r to restart.
     #
     # Additional notes:
-    #   The gravity increases to 2x after you reach a score of 250.
+    #   - You are able to input up to two key inputs per frame.
+    #   - The gravity increases to 2x after you reach a score of 250.
+    #   
     #
     # Link to video demonstration for final submission:
-    # - (insert YouTube / MyMedia / other URL here). Make sure we can view it!
+    # - https://drive.google.com/file/d/1N3wIOPEDyp6KBRZz34mmNHntH7qf-alu/view?usp=sharing
     #       
     # Are you OK with us sharing the video with people outside course staff?
     # - yes
