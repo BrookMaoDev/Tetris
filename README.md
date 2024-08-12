@@ -2,6 +2,10 @@
 
 This project is a MIPS assembly implementation of the classic Tetris game, developed as a final project for the Computer Organization course at the University of Toronto.
 
+
+https://github.com/user-attachments/assets/d25bfea1-5e43-4f2a-a237-8548107b209d
+
+
 ## Running the Game
 
 To run the Tetris game, follow these steps:
