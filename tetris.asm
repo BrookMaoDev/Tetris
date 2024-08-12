@@ -1,8 +1,7 @@
-
-  #####################################################################
+    #####################################################################
     # CSCB58 Summer 2024 Assembly Final Project - UTSC
-    # Student1: Brook Mao, 1010146815, maofengx, brook.mao@mail.utoronto.ca
-    # Student2: Richard Zhang, 1010423276, zha15296, zecro.zhang@mail.utoronto.ca
+    # Student1: Brook Mao, brook.mao@mail.utoronto.ca
+    # Student2: Richard Zhang, zecro.zhang@mail.utoronto.ca
     #       
     # Bitmap Display Configuration:
     # - Unit width in pixels: 4 (update this as needed)
